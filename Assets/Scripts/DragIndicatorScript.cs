@@ -11,6 +11,11 @@ public class DragIndicatorScript : MonoBehaviour
     List<Connection> lines = new List<Connection>();
     Vector3 camOffset = new Vector3(0, 0, 10);
 
+    public GameObject squarePrefab;
+    public float spawnInterval = 1f;
+    public float moveSpeed = 2f;
+    private Dictionary<Connection, Coroutine> spawnCoroutines = new Dictionary<Connection, Coroutine>();
+
     private void Start()
     {
         camera = Camera.main;
@@ -53,13 +58,15 @@ public class DragIndicatorScript : MonoBehaviour
                 Vector2Int currentLinePos = Vector2Int.RoundToInt(new Vector2(currentLine.GetPosition(0).x, currentLine.GetPosition(0).y));
 
                 Vector2Int currentMousePos = Vector2Int.RoundToInt(hit.collider.transform.position);
+                Debug.Log(currentMousePos.ToString());
 
                 foreach (Connection existingConnection in lines)
                 {
                     Vector2Int existingLineStartPos = Vector2Int.RoundToInt(existingConnection.StartPos);
                     Vector2Int existingLineEndPos = Vector2Int.RoundToInt(existingConnection.EndPos);
+                    Debug.Log(existingLineStartPos.ToString() + existingLineEndPos.ToString());
 
-                    if (existingLineStartPos == currentLinePos && existingLineEndPos == currentMousePos)
+                    if ((existingLineStartPos == currentLinePos && existingLineEndPos == currentMousePos) || (existingLineStartPos == currentMousePos && existingLineEndPos == currentLinePos))
                     {
                         connectionExistsAlready = true;
                         break;
@@ -73,7 +80,9 @@ public class DragIndicatorScript : MonoBehaviour
                     currentLine.BakeMesh(lineBakedMesh, true);
                     currentLine.GetComponent<MeshCollider>().sharedMesh = lineBakedMesh;
 
-                    lines.Add(new Connection(currentLine.GetPosition(0), currentLine.GetPosition(1), currentLine));
+                    Connection newConnection = new Connection(currentLine.GetPosition(0), currentLine.GetPosition(1), currentLine);
+                    lines.Add(newConnection);
+                    OnConnectionFormed(newConnection);
                 }
                 else
                 {
@@ -136,7 +145,55 @@ public class DragIndicatorScript : MonoBehaviour
                     Connection connectionToRemove = lines.Find(c => c.LineRenderer == clickedLine);
                     lines.Remove(connectionToRemove);
                     Destroy(selectedLine);
+                    OnConnectionBroken(connectionToRemove);
                 }
+            }
+        }
+    }
+
+    private void OnConnectionFormed(Connection connection)
+    {
+        Coroutine spawnCoroutine = StartCoroutine(SpawnSquares(connection));
+        spawnCoroutines[connection] = spawnCoroutine;
+    }
+
+    private IEnumerator SpawnSquares(Connection connection)
+    {
+        while (true)
+        {
+            GameObject square = Instantiate(squarePrefab, connection.StartPos, Quaternion.identity);
+            square.GetComponent<SquareScript>().connection = connection;
+            StartCoroutine(MoveSquare(square, connection.StartPos, connection.EndPos));
+            yield return new WaitForSeconds(spawnInterval);
+        }
+    }
+
+    private IEnumerator MoveSquare(GameObject square, Vector2 startPosition, Vector2 endPosition)
+    {
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += moveSpeed * Time.deltaTime;
+            square.transform.position = Vector3.Lerp(startPosition, endPosition, t);
+            yield return null;
+        }
+        Destroy(square);
+    }
+
+    private void OnConnectionBroken(Connection connection)
+    {
+        if (spawnCoroutines.ContainsKey(connection))
+        {
+            StopCoroutine(spawnCoroutines[connection]);
+            spawnCoroutines.Remove(connection);
+        }
+        GameObject[] squares = GameObject.FindGameObjectsWithTag("Car");
+        foreach (GameObject square in squares)
+        {
+            SquareScript squareScript = square.GetComponent<SquareScript>();
+            if (squareScript != null && squareScript.connection == connection)
+            {
+                Destroy(square);
             }
         }
     }
