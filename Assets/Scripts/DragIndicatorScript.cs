@@ -8,7 +8,7 @@ public class DragIndicatorScript : MonoBehaviour
     Vector3 endPos;
     Camera camera;
     LineRenderer currentLine;
-    List<LineRenderer> lines = new List<LineRenderer>();
+    List<Connection> lines = new List<Connection>();
     Vector3 camOffset = new Vector3(0, 0, 10);
 
     private void Start()
@@ -32,7 +32,6 @@ public class DragIndicatorScript : MonoBehaviour
                 currentLine.SetPosition(0, startPos);
                 currentLine.useWorldSpace = true;
                 currentLine.tag = "Connection";
-                lines.Add(currentLine);
             }
         }
 
@@ -53,15 +52,15 @@ public class DragIndicatorScript : MonoBehaviour
                 Mesh lineBakedMesh = new Mesh();
                 currentLine.BakeMesh(lineBakedMesh, true);
                 currentLine.GetComponent<MeshCollider>().sharedMesh = lineBakedMesh;
+
+                lines.Add(new Connection(currentLine.GetPosition(0), currentLine.GetPosition(1), currentLine));
             }
             else
             {
                 LineRenderer currentLR = currentLine.GetComponent<LineRenderer>();
-                if (lines.Contains(currentLR))
-                {
-                    int index = lines.IndexOf(currentLR);
-                    lines.RemoveAt(index);
-                }
+                Connection connectionToRemove = lines.Find(c => c.LineRenderer == currentLR);
+                //int index = lines.IndexOf(currentLR);
+                lines.Remove(connectionToRemove);
                 Destroy(currentLine.gameObject);
             }
             currentLine = null;
@@ -79,11 +78,28 @@ public class DragIndicatorScript : MonoBehaviour
                     GameObject selectedLine = hit.collider.gameObject;
                     LineRenderer clickedLine = selectedLine.GetComponent<LineRenderer>();
 
-                    int index = lines.IndexOf(clickedLine);
-                    lines.RemoveAt(index);
+                    Connection connectionToRemove = lines.Find(c => c.LineRenderer == clickedLine);
+                    //int index = lines.IndexOf(clickedLine);
+                    lines.Remove(connectionToRemove);
                     Destroy(selectedLine);
                 }
             }
         }
+    }
+}
+
+public class Connection {
+    Vector2 startPos;
+    Vector2 endPos;
+    LineRenderer lineRenderer;
+
+    public Vector2 StartPos { get { return startPos; }}
+    public Vector2 EndPos { get { return endPos; }}
+    public LineRenderer LineRenderer { get { return lineRenderer; }}
+
+    public Connection(Vector2 startPos, Vector2 endPos, LineRenderer lineRenderer) {
+        this.startPos = startPos;
+        this.endPos = endPos;
+        this.lineRenderer = lineRenderer;
     }
 }
