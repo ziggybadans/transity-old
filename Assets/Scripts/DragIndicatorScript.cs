@@ -95,14 +95,42 @@ public class DragIndicatorScript : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-            Vector3 mousePos = camera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -transform.position.z));
-            RaycastHit hit;
+            Vector2 mousePos = camera.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
 
-            if (Physics.Raycast(mousePos, transform.TransformDirection(Vector3.forward), out hit, Mathf.Infinity))
+            if (hit.collider != null && hit.collider.CompareTag("Town"))
             {
-                if (hit.collider.CompareTag("Connection"))
+                Vector2Int townPos = Vector2Int.RoundToInt(hit.collider.transform.position);
+                Debug.Log("Hit town at: " + townPos.ToString());
+
+                List<Connection> connectionsToRemove = new List<Connection>();
+
+                foreach (Connection existingConnection in lines)
                 {
-                    GameObject selectedLine = hit.collider.gameObject;
+                    if (townPos == existingConnection.StartPos || townPos == existingConnection.EndPos)
+                    {
+                        connectionsToRemove.Add(existingConnection);
+                    }
+                }
+
+                foreach (Connection connectionToRemove in connectionsToRemove)
+                {
+                    lines.Remove(connectionToRemove);
+                    Destroy(connectionToRemove.LineRenderer.gameObject);
+                }
+
+                connectionsToRemove.Clear();
+            }
+
+            Vector3 mousePos3 = camera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -transform.position.z));
+            RaycastHit hit3D;
+
+            if (Physics.Raycast(mousePos3, transform.TransformDirection(Vector3.forward), out hit3D, Mathf.Infinity))
+            {
+                if (hit3D.collider.CompareTag("Connection"))
+                {
+                    Debug.Log("Hit connection at: " + hit3D.collider.transform.position.ToString());
+                    GameObject selectedLine = hit3D.collider.gameObject;
                     LineRenderer clickedLine = selectedLine.GetComponent<LineRenderer>();
 
                     Connection connectionToRemove = lines.Find(c => c.LineRenderer == clickedLine);
