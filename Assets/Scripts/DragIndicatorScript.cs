@@ -28,7 +28,7 @@ public class DragIndicatorScript : MonoBehaviour
                 currentLine = new GameObject("Line").AddComponent<LineRenderer>();
                 currentLine.gameObject.AddComponent<MeshCollider>();
                 currentLine.positionCount = 2;
-                startPos = camera.ScreenToWorldPoint(Input.mousePosition) + camOffset;
+                startPos = hit.collider.transform.position;
                 currentLine.SetPosition(0, startPos);
                 currentLine.useWorldSpace = true;
                 currentLine.tag = "Connection";
@@ -48,18 +48,45 @@ public class DragIndicatorScript : MonoBehaviour
 
             if (hit.collider != null && hit.collider.CompareTag("Town"))
             {
-                currentLine.SetPosition(1, hit.collider.transform.position);
-                Mesh lineBakedMesh = new Mesh();
-                currentLine.BakeMesh(lineBakedMesh, true);
-                currentLine.GetComponent<MeshCollider>().sharedMesh = lineBakedMesh;
+                bool connectionExistsAlready = false;
 
-                lines.Add(new Connection(currentLine.GetPosition(0), currentLine.GetPosition(1), currentLine));
+                Vector2Int currentLinePos = Vector2Int.RoundToInt(new Vector2(currentLine.GetPosition(0).x, currentLine.GetPosition(0).y));
+
+                Vector2Int currentMousePos = Vector2Int.RoundToInt(hit.collider.transform.position);
+
+                foreach (Connection existingConnection in lines)
+                {
+                    Vector2Int existingLineStartPos = Vector2Int.RoundToInt(existingConnection.StartPos);
+                    Vector2Int existingLineEndPos = Vector2Int.RoundToInt(existingConnection.EndPos);
+
+                    if (existingLineStartPos == currentLinePos && existingLineEndPos == currentMousePos)
+                    {
+                        connectionExistsAlready = true;
+                        break;
+                    }
+                }
+
+                if (!connectionExistsAlready)
+                {
+                    currentLine.SetPosition(1, hit.collider.transform.position);
+                    Mesh lineBakedMesh = new Mesh();
+                    currentLine.BakeMesh(lineBakedMesh, true);
+                    currentLine.GetComponent<MeshCollider>().sharedMesh = lineBakedMesh;
+
+                    lines.Add(new Connection(currentLine.GetPosition(0), currentLine.GetPosition(1), currentLine));
+                }
+                else
+                {
+                    LineRenderer currentLR = currentLine.GetComponent<LineRenderer>();
+                    Connection connectionToRemove = lines.Find(c => c.LineRenderer == currentLR);
+                    lines.Remove(connectionToRemove);
+                    Destroy(currentLine.gameObject);
+                }
             }
             else
             {
                 LineRenderer currentLR = currentLine.GetComponent<LineRenderer>();
                 Connection connectionToRemove = lines.Find(c => c.LineRenderer == currentLR);
-                //int index = lines.IndexOf(currentLR);
                 lines.Remove(connectionToRemove);
                 Destroy(currentLine.gameObject);
             }
@@ -79,7 +106,6 @@ public class DragIndicatorScript : MonoBehaviour
                     LineRenderer clickedLine = selectedLine.GetComponent<LineRenderer>();
 
                     Connection connectionToRemove = lines.Find(c => c.LineRenderer == clickedLine);
-                    //int index = lines.IndexOf(clickedLine);
                     lines.Remove(connectionToRemove);
                     Destroy(selectedLine);
                 }
@@ -88,16 +114,18 @@ public class DragIndicatorScript : MonoBehaviour
     }
 }
 
-public class Connection {
+public class Connection
+{
     Vector2 startPos;
     Vector2 endPos;
     LineRenderer lineRenderer;
 
-    public Vector2 StartPos { get { return startPos; }}
-    public Vector2 EndPos { get { return endPos; }}
-    public LineRenderer LineRenderer { get { return lineRenderer; }}
+    public Vector2 StartPos { get { return startPos; } }
+    public Vector2 EndPos { get { return endPos; } }
+    public LineRenderer LineRenderer { get { return lineRenderer; } }
 
-    public Connection(Vector2 startPos, Vector2 endPos, LineRenderer lineRenderer) {
+    public Connection(Vector2 startPos, Vector2 endPos, LineRenderer lineRenderer)
+    {
         this.startPos = startPos;
         this.endPos = endPos;
         this.lineRenderer = lineRenderer;
