@@ -53,43 +53,41 @@ public class DragIndicatorScript : MonoBehaviour
 
             if (hit.collider != null && hit.collider.CompareTag("Town"))
             {
-                bool connectionExistsAlready = false;
-
                 Vector2Int currentLinePos = Vector2Int.RoundToInt(new Vector2(currentLine.GetPosition(0).x, currentLine.GetPosition(0).y));
-
-                Vector2Int currentMousePos = Vector2Int.RoundToInt(hit.collider.transform.position);
-                Debug.Log(currentMousePos.ToString());
-
-                foreach (Connection existingConnection in lines)
+                Vector2Int currentMousePos = Vector2Int.RoundToInt(new Vector2(hit.collider.transform.position.x, hit.collider.transform.position.y));
+                if (currentLinePos != currentMousePos)
                 {
-                    Vector2Int existingLineStartPos = Vector2Int.RoundToInt(existingConnection.StartPos);
-                    Vector2Int existingLineEndPos = Vector2Int.RoundToInt(existingConnection.EndPos);
-                    Debug.Log(existingLineStartPos.ToString() + existingLineEndPos.ToString());
+                    bool connectionExistsAlready = false;
 
-                    if ((existingLineStartPos == currentLinePos && existingLineEndPos == currentMousePos) || (existingLineStartPos == currentMousePos && existingLineEndPos == currentLinePos))
+                    foreach (Connection existingConnection in lines)
                     {
-                        connectionExistsAlready = true;
-                        break;
+                        Vector2Int existingLineStartPos = Vector2Int.RoundToInt(existingConnection.StartPos);
+                        Vector2Int existingLineEndPos = Vector2Int.RoundToInt(existingConnection.EndPos);
+                        if ((existingLineStartPos == currentLinePos && existingLineEndPos == currentMousePos) || (existingLineStartPos == currentMousePos && existingLineEndPos == currentLinePos))
+                        {
+                            connectionExistsAlready = true;
+                            break;
+                        }
                     }
-                }
 
-                if (!connectionExistsAlready)
-                {
-                    currentLine.SetPosition(1, hit.collider.transform.position);
-                    Mesh lineBakedMesh = new Mesh();
-                    currentLine.BakeMesh(lineBakedMesh, true);
-                    currentLine.GetComponent<MeshCollider>().sharedMesh = lineBakedMesh;
+                    if (!connectionExistsAlready)
+                    {
+                        currentLine.SetPosition(1, hit.collider.transform.position);
+                        Mesh lineBakedMesh = new Mesh();
+                        currentLine.BakeMesh(lineBakedMesh, true);
+                        currentLine.GetComponent<MeshCollider>().sharedMesh = lineBakedMesh;
 
-                    Connection newConnection = new Connection(currentLine.GetPosition(0), currentLine.GetPosition(1), currentLine);
-                    lines.Add(newConnection);
-                    OnConnectionFormed(newConnection);
-                }
-                else
-                {
-                    LineRenderer currentLR = currentLine.GetComponent<LineRenderer>();
-                    Connection connectionToRemove = lines.Find(c => c.LineRenderer == currentLR);
-                    lines.Remove(connectionToRemove);
-                    Destroy(currentLine.gameObject);
+                        Connection newConnection = new Connection(currentLine.GetPosition(0), currentLine.GetPosition(1), currentLine);
+                        lines.Add(newConnection);
+                        OnConnectionFormed(newConnection);
+                    }
+                    else
+                    {
+                        LineRenderer currentLR = currentLine.GetComponent<LineRenderer>();
+                        Connection connectionToRemove = lines.Find(c => c.LineRenderer == currentLR);
+                        lines.Remove(connectionToRemove);
+                        Destroy(currentLine.gameObject);
+                    }
                 }
             }
             else
@@ -171,7 +169,7 @@ public class DragIndicatorScript : MonoBehaviour
     private IEnumerator MoveSquare(GameObject square, Vector2 startPosition, Vector2 endPosition)
     {
         float t = 0f;
-        while (t < 1f)
+        while (t < 1f && square != null)
         {
             t += moveSpeed * Time.deltaTime;
             square.transform.position = Vector3.Lerp(startPosition, endPosition, t);
@@ -190,10 +188,13 @@ public class DragIndicatorScript : MonoBehaviour
         GameObject[] squares = GameObject.FindGameObjectsWithTag("Car");
         foreach (GameObject square in squares)
         {
-            SquareScript squareScript = square.GetComponent<SquareScript>();
-            if (squareScript != null && squareScript.connection == connection)
+            if (square != null)
             {
-                Destroy(square);
+                SquareScript squareScript = square.GetComponent<SquareScript>();
+                if (squareScript != null && squareScript.connection == connection)
+                {
+                    Destroy(square);
+                }
             }
         }
     }
