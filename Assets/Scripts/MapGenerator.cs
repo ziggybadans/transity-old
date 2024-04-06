@@ -9,6 +9,7 @@ public class MapGenerator : MonoBehaviour
     public Vector2Int numTowns = new Vector2Int(1, 3);
     public Vector2Int numRural = new Vector2Int(5, 15);
     public float clumpingFactor = 0.5f;
+    public float minTownDistance = 5f;
 
     public GameObject townPrefab;
     public GameObject cityPrefab;
@@ -25,6 +26,14 @@ public class MapGenerator : MonoBehaviour
     public enum TownSize
     {
         Rural, Town, City
+    }
+
+    public static bool VectorsWithinPercentage(Vector2Int a, Vector2Int b, float percentage)
+    {
+        float xDiff = 100f * Mathf.Abs(a.x - b.x) / ((a.x + b.x) / 2f);
+        float yDiff = 100f * Mathf.Abs(a.y - b.y) / ((a.y + b.y) / 2f);
+
+        return xDiff <= percentage && yDiff <= percentage;
     }
 
     public List<Town> Generate()
@@ -46,14 +55,35 @@ public class MapGenerator : MonoBehaviour
             int adjacentCount = Random.Range(numTowns.x, numTowns.y);
             for (int j = 0; j < adjacentCount; j++)
             {
+                Vector2Int approxCityPos = Vector2Int.RoundToInt(cityPos);
                 Vector2 adjacentPos = cityPos + Random.insideUnitCircle * clumpingFactor;
-
-                Town adjacentTown = new Town()
+                Vector2Int approxAdjacentPos = Vector2Int.RoundToInt(adjacentPos);
+                if (!VectorsWithinPercentage(approxCityPos, approxAdjacentPos, minTownDistance))
                 {
-                    position = adjacentPos,
-                    size = TownSize.Town
-                };
-                towns.Add(adjacentTown);
+                    bool safeToPlace = true;
+                    foreach (Town town in towns)
+                    {
+                        if (town.size == TownSize.Town)
+                        {
+                            Vector2Int approxTownPos = Vector2Int.RoundToInt(town.position);
+                            if (VectorsWithinPercentage(approxAdjacentPos, approxTownPos, minTownDistance))
+                            {
+                                safeToPlace = false;
+                                Debug.Log("Hit another town!");
+                                break;
+                            }
+                        }
+                    }
+                    if (safeToPlace)
+                    {
+                        Town adjacentTown = new Town()
+                        {
+                            position = adjacentPos,
+                            size = TownSize.Town
+                        };
+                        towns.Add(adjacentTown);
+                    }
+                }
             }
         }
 

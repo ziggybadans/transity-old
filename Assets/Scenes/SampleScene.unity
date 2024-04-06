@@ -165,12 +165,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapSize: {x: 100, y: 100}
   numCities: {x: 2, y: 4}
-  numTowns: {x: 2, y: 5}
+  numTowns: {x: 10, y: 20}
   numRural: {x: 4, y: 10}
   clumpingFactor: 10.6
-  ruralSpacingFactor: 1
-  townSpacingFactor: 1
-  citySpacingFactor: 1
+  minTownDistance: 14.83
   townPrefab: {fileID: 3353048467254477899, guid: ff82e746ecb54014d9424d5a667bcac0, type: 3}
   cityPrefab: {fileID: 2207525570455308027, guid: 519bf1eb7fb78e247af7b96873b31f0b, type: 3}
   ruralPrefab: {fileID: 7229210762670684338, guid: 7cab22f1f71ccc340b2560e1ba5daf08, type: 3}
@@ -373,6 +371,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   squarePrefab: {fileID: 1464936474102003745, guid: 6587af60063117f4fbf1e9c656bba2df, type: 3}
+  connectionMat: {fileID: 2100000, guid: db6840ad5db53d9429c969a790fab985, type: 2}
   spawnInterval: 1
   moveSpeed: 2
 --- !u!4 &1247750280

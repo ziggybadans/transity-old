@@ -12,6 +12,7 @@ public class DragIndicatorScript : MonoBehaviour
     Vector3 camOffset = new Vector3(0, 0, 10);
 
     public GameObject squarePrefab;
+    public Material connectionMat;
     public float spawnInterval = 1f;
     public float moveSpeed = 2f;
     private Dictionary<Connection, Coroutine> spawnCoroutines = new Dictionary<Connection, Coroutine>();
@@ -36,6 +37,9 @@ public class DragIndicatorScript : MonoBehaviour
                 startPos = hit.collider.transform.position;
                 currentLine.SetPosition(0, startPos);
                 currentLine.useWorldSpace = true;
+                currentLine.material = connectionMat;
+                currentLine.startColor = Color.black;
+                currentLine.endColor = Color.black;
                 currentLine.tag = "Connection";
             }
         }
