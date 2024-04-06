@@ -160,19 +160,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 106178433}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8313779663ea14546ae01517dc5e2399, type: 3}
+  m_Script: {fileID: 11500000, guid: 5de98d52e7644cb42be4f26a6fe8a154, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSize: {x: 100, y: 100}
-  numCities: {x: 2, y: 4}
-  numTowns: {x: 10, y: 20}
-  numRural: {x: 4, y: 10}
-  clumpingFactor: 10.6
-  minTownDistance: 14.83
-  townPrefab: {fileID: 3353048467254477899, guid: ff82e746ecb54014d9424d5a667bcac0, type: 3}
-  cityPrefab: {fileID: 2207525570455308027, guid: 519bf1eb7fb78e247af7b96873b31f0b, type: 3}
-  ruralPrefab: {fileID: 7229210762670684338, guid: 7cab22f1f71ccc340b2560e1ba5daf08, type: 3}
-  mainCamera: {fileID: 519420031}
+  localityPrefab: {fileID: 1174446851564759872, guid: e6e4092efa8a8be4da374f0e3eab1977, type: 3}
+  gridSize: 10
+  gridSpacing: 2
+  localitySize: 0.5
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -469,8 +463,8 @@ Transform:
   m_GameObject: {fileID: 1667340861}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 134.5798, y: -68.8716, z: 38.29}
-  m_LocalScale: {x: 1260.6128, y: 664.788, z: 1}
+  m_LocalPosition: {x: 1377.124, y: -1525.4431, z: 38.29}
+  m_LocalScale: {x: 12425.604, y: 7834.572, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -481,5 +475,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 519420032}
   - {fileID: 106178434}
-  - {fileID: 1667340863}
   - {fileID: 1247750280}
+  - {fileID: 1667340863}
