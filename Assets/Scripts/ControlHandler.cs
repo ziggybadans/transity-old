@@ -81,7 +81,7 @@ public class ControlHandler : MonoBehaviour
             currentConnectionObjectLr.SetPosition(1, endPos);
 
             Connection currentConnection = currentConnectionObject.AddComponent<Connection>();
-            currentConnection.SetupConnection(startPos, endPos);
+            currentConnection.SetupConnection(startPos, endPos, numEntites, entitySpeed, entityPrefab);
             currentConnectionObject.tag = "Connection";
 
             currentConnectionObjectLr.positionCount = 2;
@@ -115,29 +115,6 @@ public class ControlHandler : MonoBehaviour
                 Destroy(hit.collider.gameObject);
                 Debug.Log("Remaining connections:" + connections.Count.ToString());
             }
-        }
-    }
-
-    private void SpawnEntities(Vector3 startPos, Vector3 endPos)
-    {
-        Vector3 direction = (endPos - startPos).normalized;
-        float lineLength = Vector3.Distance(startPos, endPos);
-        float spacing = lineLength / (numEntites + 1);
-
-        for (int i = 1; i <= numEntites; i++)
-        {
-            Vector3 spawnPos = startPos + (direction * spacing * i);
-            GameObject entity = Instantiate(entityPrefab, spawnPos, Quaternion.identity);
-            bool movingForward;
-            if (i % 2 == 0)
-            {
-                movingForward = false;
-            }
-            else
-            {
-                movingForward = true;
-            }
-            entity.GetComponent<EntityHandler>().SetupMovement(startPos, endPos, entitySpeed, movingForward);
         }
     }
 }
