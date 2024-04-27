@@ -33,14 +33,14 @@ public class Connection : MonoBehaviour
             entities.Add(entity);
             if (i % 2 == 0)
             {
-                entity.GetComponent<EntityMovement>().movingForward = false;
+                entity.GetComponent<Transport>().movingForward = false;
             }
             else
             {
-                entity.GetComponent<EntityMovement>().movingForward = true;
+                entity.GetComponent<Transport>().movingForward = true;
             }
-            entity.GetComponent<EntityMovement>().startPos = startPos;
-            entity.GetComponent<EntityMovement>().endPos = endPos;
+            entity.GetComponent<Transport>().startPos = startPos;
+            entity.GetComponent<Transport>().endPos = endPos;
 
             yield return new WaitForSeconds(0.1f);
         }

@@ -6,7 +6,7 @@ using UnityEngine;
 public class ControlHandler : MonoBehaviour
 {
     public Material lineMaterial;
-    public Camera cam;
+    private Camera cam;
     public GameObject entityPrefab;
     public float lineWidth = 0.5f;
     public int numEntites = 2;
