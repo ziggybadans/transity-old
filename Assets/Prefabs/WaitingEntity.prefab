@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9087050981729939580}
   - component: {fileID: 6631105718937048472}
   m_Layer: 0
-  m_Name: Entity
+  m_Name: WaitingEntity
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -486,6 +486,7 @@ GameObject:
   - component: {fileID: 950871465}
   - component: {fileID: 950871464}
   - component: {fileID: 950871466}
+  - component: {fileID: 950871467}
   m_Layer: 0
   m_Name: City
   m_TagString: Settlement
@@ -608,6 +609,20 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2.56, y: 2.24}
   m_EdgeRadius: 0
+--- !u!114 &950871467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950871463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 509d495b3176da741b62689b1904cc5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
+  spawnInterval: 5
 --- !u!1 &1417189256
 GameObject:
   m_ObjectHideFlags: 0
@@ -772,6 +787,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lineMaterial: {fileID: 2100000, guid: c660081b4df3c914da0ba0fd2510d41d, type: 2}
   cam: {fileID: 519420031}
+  lineWidth: 0.5
+  entityPrefab: {fileID: 1863948226680124607, guid: 1b0be76dfee1fde4f93965139bf55b6d, type: 3}
+  numEntites: 2
+  entitySpeed: 2
 --- !u!4 &1789311887
 Transform:
   m_ObjectHideFlags: 0

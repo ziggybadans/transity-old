@@ -8,6 +8,9 @@ public class ControlHandler : MonoBehaviour
     public Material lineMaterial;
     public Camera cam;
     public float lineWidth = 0.5f;
+    public GameObject entityPrefab;
+    public int numEntites = 2;
+    public float entitySpeed = 2f;
     private GameObject currentConnection;
     private Vector2 startPos;
     private Vector2 endPos;
@@ -86,6 +89,7 @@ public class ControlHandler : MonoBehaviour
             connectionLineRenderer.GetComponent<MeshCollider>().sharedMesh = mesh;
 
             connections.Add(currentConnection);
+            SpawnEntities(startPos, endPos);
         }
         else
         {
@@ -105,6 +109,24 @@ public class ControlHandler : MonoBehaviour
                 Destroy(hit.collider.gameObject);
                 Debug.Log("Remaining connections:" + connections.Count.ToString());
             }
+        }
+    }
+
+    private void SpawnEntities(Vector3 startPos, Vector3 endPos) {
+        Vector3 direction = (endPos - startPos).normalized;
+        float lineLength = Vector3.Distance(startPos, endPos);
+        float spacing = lineLength / (numEntites + 1);
+
+        for (int i = 1; i <= numEntites; i++) {
+            Vector3 spawnPos = startPos + (direction * spacing * i);
+            GameObject entity = Instantiate(entityPrefab, spawnPos, Quaternion.identity);
+            bool movingForward;
+            if (i % 2 == 0) {
+                movingForward = false;
+            } else {
+                movingForward = true;
+            }
+            entity.GetComponent<EntityHandler>().SetupMovement(startPos, endPos, entitySpeed, movingForward);
         }
     }
 }
