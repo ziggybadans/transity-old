@@ -10,7 +10,6 @@ public class ControlHandler : MonoBehaviour
     public GameObject entityPrefab;
     public float lineWidth = 0.5f;
     public int numEntites = 2;
-    public float entitySpeed = 2f;
 
     private bool drawing;
     private GameObject currentConnectionObject;
@@ -81,7 +80,7 @@ public class ControlHandler : MonoBehaviour
             currentConnectionObjectLr.SetPosition(1, endPos);
 
             Connection currentConnection = currentConnectionObject.AddComponent<Connection>();
-            currentConnection.SetupConnection(startPos, endPos, numEntites, entitySpeed, entityPrefab);
+            currentConnection.SetupConnection(startPos, endPos, numEntites, entityPrefab);
             currentConnectionObject.tag = "Connection";
 
             currentConnectionObjectLr.positionCount = 2;
@@ -111,9 +110,10 @@ public class ControlHandler : MonoBehaviour
         {
             if (hit.collider.CompareTag("Connection"))
             {
+                Connection selectedConnection = hit.collider.GetComponent<Connection>();
+                selectedConnection.DestroyAllEntities();
                 connections.Remove(hit.collider.GetComponent<Connection>());
                 Destroy(hit.collider.gameObject);
-                Debug.Log("Remaining connections:" + connections.Count.ToString());
             }
         }
     }
