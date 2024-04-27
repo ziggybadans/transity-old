@@ -31,12 +31,21 @@ public class Settlement : MonoBehaviour
     {
         Vector2 spawnPosition = transform.position;
 
+        if (passengers.Count > 0)
+        {
+            Passenger lastEntity = passengers[passengers.Count - 1];
+            spawnPosition = lastEntity.gameObject.transform.position + (Vector3.left *
+                lastEntity.GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
+        }
+        else
+        {
+            spawnPosition += (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.up * 0.5f);
+        }
+
         GameObject newEntity = Instantiate(entityPrefab, spawnPosition, Quaternion.identity);
-        newEntity.SetActive(false);
         Passenger newPassenger = newEntity.GetComponent<Passenger>();
         newPassenger.origin = this;
         passengers.Add(newEntity.GetComponent<Passenger>());
-        textComponent.text = passengers.Count.ToString();
     }
 
     public Passenger AlightPassenger()
@@ -44,8 +53,18 @@ public class Settlement : MonoBehaviour
         if (passengers.Count > 0)
         {
             Passenger passengerAlighting = passengers[0];
+            passengerAlighting.gameObject.SetActive(false);
             passengers.Remove(passengerAlighting);
-            textComponent.text = passengers.Count.ToString();
+            for (int i = 0; i < passengers.Count; i++) {
+                if (i == 0) {
+                    passengers[i].gameObject.transform.position = transform.position +
+                        (Vector3.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector3.up * 0.5f);
+                } else {
+                    passengers[i].gameObject.transform.position = 
+                        passengers[i - 1].gameObject.transform.position + 
+                        (Vector3.left * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
+                }
+            }
             return passengerAlighting;
         }
         return null;
