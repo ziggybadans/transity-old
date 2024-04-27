@@ -353,6 +353,7 @@ GameObject:
   - component: {fileID: 820192296}
   - component: {fileID: 820192295}
   - component: {fileID: 820192297}
+  - component: {fileID: 820192298}
   m_Layer: 0
   m_Name: Town
   m_TagString: Settlement
@@ -475,6 +476,21 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2.56, y: 2.56}
   m_EdgeRadius: 0
+--- !u!114 &820192298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820192294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 509d495b3176da741b62689b1904cc5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
+  spawnInterval: 2
+  passengers: []
 --- !u!1 &950871463
 GameObject:
   m_ObjectHideFlags: 0
@@ -623,6 +639,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
   spawnInterval: 5
+  passengers: []
 --- !u!1 &1417189256
 GameObject:
   m_ObjectHideFlags: 0
@@ -634,6 +651,7 @@ GameObject:
   - component: {fileID: 1417189258}
   - component: {fileID: 1417189257}
   - component: {fileID: 1417189259}
+  - component: {fileID: 1417189260}
   m_Layer: 0
   m_Name: Rural Town
   m_TagString: Settlement
@@ -756,6 +774,21 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2.56, y: 2.56}
   m_EdgeRadius: 0
+--- !u!114 &1417189260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1417189256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 509d495b3176da741b62689b1904cc5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
+  spawnInterval: 1
+  passengers: []
 --- !u!1 &1789311885
 GameObject:
   m_ObjectHideFlags: 0
@@ -786,11 +819,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineMaterial: {fileID: 2100000, guid: c660081b4df3c914da0ba0fd2510d41d, type: 2}
-  cam: {fileID: 519420031}
+  entityPrefab: {fileID: 6838855262692231112, guid: 1b0be76dfee1fde4f93965139bf55b6d, type: 3}
   lineWidth: 0.5
-  entityPrefab: {fileID: 1863948226680124607, guid: 1b0be76dfee1fde4f93965139bf55b6d, type: 3}
-  numEntites: 2
-  entitySpeed: 2
+  numEntites: 1
 --- !u!4 &1789311887
 Transform:
   m_ObjectHideFlags: 0

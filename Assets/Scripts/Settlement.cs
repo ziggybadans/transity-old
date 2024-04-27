@@ -9,7 +9,7 @@ public class Settlement : MonoBehaviour
     public GameObject entityPrefab;
     public float spawnInterval = 5f;
 
-    public List<GameObject> passengers = new();
+    public List<Passenger> passengers = new();
 
     private void Start()
     {
@@ -31,7 +31,7 @@ public class Settlement : MonoBehaviour
 
         if (passengers.Count > 0)
         {
-            GameObject lastEntity = passengers[passengers.Count - 1];
+            Passenger lastEntity = passengers[passengers.Count - 1];
             spawnPosition = lastEntity.transform.position + (Vector3.left *
                 lastEntity.GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
         }
@@ -41,15 +41,18 @@ public class Settlement : MonoBehaviour
         }
 
         GameObject newEntity = Instantiate(entityPrefab, spawnPosition, Quaternion.identity);
-        passengers.Add(newEntity);
+        Passenger newPassenger = newEntity.GetComponent<Passenger>();
+        newPassenger.origin = this;
+        passengers.Add(newEntity.GetComponent<Passenger>());
     }
 
-    public GameObject AlightPassenger()
+    public Passenger AlightPassenger()
     {
         if (passengers.Count > 0)
         {
-            GameObject passenger = passengers[0];
+            Passenger passenger = passengers[0];
             passengers.RemoveAt(0);
+            passenger.gameObject.SetActive(false);
             return passenger;
         }
         return null;

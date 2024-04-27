@@ -6,12 +6,15 @@ using UnityEngine;
 public class Transport : MonoBehaviour
 {
     public bool movingForward;
-    public bool boarding;
+    // 0 = moving, 1 = boarding, 2 = ready to depart
+    public int boarding = 0;
+    // 0 = empty, 1 = 
+    public int status = 0;
     public float entitySpeed = 1f;
     public Vector3 startPos;
     public Vector3 endPos;
 
-    public List<GameObject> passengers = new();
+    public List<Passenger> passengers = new();
 
     private void Update()
     {
@@ -22,15 +25,15 @@ public class Transport : MonoBehaviour
         if (hit.collider != null && hit.collider.CompareTag("Settlement") && (pos.Equals(startPos) || pos.Equals(endPos)))
         {
             // As long as it's not already boarding, the train can start boarding
-            if (!boarding)
+            if (boarding == 0)
             {
-                boarding = true;
+                boarding = 1;
                 StartCoroutine(BoardAndAlight(hit));
             }
         }
 
         // If the train is not boarding, it can start moving
-        if (!boarding)
+        if (boarding == 2 || boarding == 0)
         {
             // Reversing direction on the connection
             if (movingForward)
@@ -63,8 +66,9 @@ public class Transport : MonoBehaviour
             // Check if there are passengers on board
             if (passengers.Count > 0)
             {
+                int i = 0;
                 // Alight passengers one by one
-                StartCoroutine(PassengersAlighting());
+                StartCoroutine(PassengersAlighting(hit.collider.GetComponent<Settlement>(), i));
             }
 
             // Wait for 1 second before checking again
@@ -73,23 +77,24 @@ public class Transport : MonoBehaviour
         }
 
         // Reset boarding flag and resume movement
-        boarding = false;
+        boarding = 2;
     }
 
     private IEnumerator PassengersBoarding(Settlement settlement)
     {
-        GameObject passenger = settlement.AlightPassenger();
-        passengers.Add(passenger);
+        Passenger passenger = settlement.AlightPassenger();
+        if (passenger != null) passengers.Add(passenger);
         yield return new WaitForSeconds(1f);
     }
 
-    private IEnumerator PassengersAlighting()
+    private IEnumerator PassengersAlighting(Settlement settlement, int i)
     {
-        GameObject passenger = passengers[0];
-        passengers.RemoveAt(0);
-        Destroy(passenger);
+        Passenger passenger = passengers[i];
+        if (passenger.origin != settlement)
+        {
+            passengers.RemoveAt(i);
+            Destroy(passenger);
+        }
         yield return new WaitForSeconds(1f);
     }
-
-
 }

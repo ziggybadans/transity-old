@@ -4,15 +4,10 @@ using UnityEngine;
 
 public class Passenger : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public Settlement origin, destination;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    public void SetupPassenger(Settlement startTown, Settlement endTown) {
+        origin = startTown;
+        destination = endTown;
     }
 }
