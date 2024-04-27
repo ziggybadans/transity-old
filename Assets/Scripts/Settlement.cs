@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Settlement : MonoBehaviour
 {
     public GameObject entityPrefab;
+    public Text textComponent;
     public float spawnInterval = 5f;
 
     public List<Passenger> passengers = new();
@@ -29,31 +31,22 @@ public class Settlement : MonoBehaviour
     {
         Vector2 spawnPosition = transform.position;
 
-        if (passengers.Count > 0)
-        {
-            Passenger lastEntity = passengers[passengers.Count - 1];
-            spawnPosition = lastEntity.transform.position + (Vector3.left *
-                lastEntity.GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-        }
-        else
-        {
-            spawnPosition += (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.up * 0.5f);
-        }
-
         GameObject newEntity = Instantiate(entityPrefab, spawnPosition, Quaternion.identity);
+        newEntity.SetActive(false);
         Passenger newPassenger = newEntity.GetComponent<Passenger>();
         newPassenger.origin = this;
         passengers.Add(newEntity.GetComponent<Passenger>());
+        textComponent.text = passengers.Count.ToString();
     }
 
     public Passenger AlightPassenger()
     {
         if (passengers.Count > 0)
         {
-            Passenger passenger = passengers[0];
-            passengers.RemoveAt(0);
-            passenger.gameObject.SetActive(false);
-            return passenger;
+            Passenger passengerAlighting = passengers[0];
+            passengers.Remove(passengerAlighting);
+            textComponent.text = passengers.Count.ToString();
+            return passengerAlighting;
         }
         return null;
     }
