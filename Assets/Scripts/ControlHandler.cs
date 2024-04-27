@@ -7,15 +7,17 @@ public class ControlHandler : MonoBehaviour
 {
     public Material lineMaterial;
     public Camera cam;
-    public float lineWidth = 0.5f;
     public GameObject entityPrefab;
+    public float lineWidth = 0.5f;
     public int numEntites = 2;
     public float entitySpeed = 2f;
-    private GameObject currentConnection;
+
+    private bool drawing;
+    private GameObject currentConnectionObject;
+    private LineRenderer currentConnectionObjectLr;
     private Vector2 startPos;
     private Vector2 endPos;
-    private bool drawing;
-    private List<GameObject> connections = new();
+    private List<Connection> connections = new();
 
     private void Start()
     {
@@ -30,13 +32,13 @@ public class ControlHandler : MonoBehaviour
         }
         if (drawing)
         {
-            LineRenderer connectionLineRenderer = currentConnection.GetComponent<LineRenderer>();
             Vector3 currentPos = cam.ScreenToWorldPoint(Input.mousePosition);
             currentPos.z = 0f;
-            connectionLineRenderer.SetPosition(1, currentPos);
+            currentConnectionObjectLr.SetPosition(1, currentPos);
         }
         if (Input.GetMouseButtonUp(0) && drawing)
         {
+            drawing = false;
             CreateConnection();
         }
         if (Input.GetMouseButtonDown(1) && !drawing)
@@ -54,76 +56,85 @@ public class ControlHandler : MonoBehaviour
         {
             drawing = true;
 
-            currentConnection = new GameObject("Connection");
-            LineRenderer connectionLineRenderer = currentConnection.AddComponent<LineRenderer>();
-            connectionLineRenderer.gameObject.AddComponent<MeshCollider>();
+            currentConnectionObject = new GameObject("Connection");
+            currentConnectionObjectLr = currentConnectionObject.AddComponent<LineRenderer>();
 
-            connectionLineRenderer.positionCount = 2;
+            currentConnectionObjectLr.positionCount = 2;
             startPos = hit.collider.transform.position;
-            connectionLineRenderer.SetPosition(0, startPos);
-            connectionLineRenderer.SetPosition(1, startPos);
+            currentConnectionObjectLr.SetPosition(0, startPos);
+            currentConnectionObjectLr.SetPosition(1, startPos);
 
-            connectionLineRenderer.startWidth = lineWidth;
-            connectionLineRenderer.endWidth = lineWidth;
-            connectionLineRenderer.useWorldSpace = false;
-            connectionLineRenderer.material = lineMaterial;
-            connectionLineRenderer.tag = "Connection";
+            currentConnectionObjectLr.startWidth = lineWidth;
+            currentConnectionObjectLr.endWidth = lineWidth;
+            currentConnectionObjectLr.material = lineMaterial;
         }
     }
 
     private void CreateConnection()
     {
-        drawing = false;
-        LineRenderer connectionLineRenderer = currentConnection.GetComponent<LineRenderer>();
-
         Vector2 liftPos = cam.ScreenToWorldPoint(Input.mousePosition);
         RaycastHit2D hit = Physics2D.Raycast(liftPos, Vector2.zero);
 
         if (hit.collider != null && hit.collider.CompareTag("Settlement"))
         {
             endPos = hit.collider.transform.position;
-            connectionLineRenderer.SetPosition(1, endPos);
+            currentConnectionObjectLr.SetPosition(1, endPos);
 
-            Mesh mesh = new();
-            connectionLineRenderer.BakeMesh(mesh, cam, true);
-            connectionLineRenderer.GetComponent<MeshCollider>().sharedMesh = mesh;
+            Connection currentConnection = currentConnectionObject.AddComponent<Connection>();
+            currentConnection.SetupConnection(startPos, endPos);
+            currentConnectionObject.tag = "Connection";
+
+            currentConnectionObjectLr.positionCount = 2;
+            currentConnectionObjectLr.SetPosition(0, startPos);
+            currentConnectionObjectLr.SetPosition(1, endPos);
+            currentConnectionObjectLr.startWidth = lineWidth;
+            currentConnectionObjectLr.endWidth = lineWidth;
+            currentConnectionObjectLr.material = lineMaterial;
+
+            MeshCollider connectionMesh = currentConnectionObject.AddComponent<MeshCollider>();
+            Mesh mesh = new Mesh();
+            currentConnectionObjectLr.BakeMesh(mesh, cam, true);
+            connectionMesh.sharedMesh = mesh;
 
             connections.Add(currentConnection);
-            SpawnEntities(startPos, endPos);
         }
         else
         {
-            Destroy(connectionLineRenderer.gameObject);
+            Destroy(currentConnectionObject);
         }
     }
 
     private void DeleteConnection()
     {
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             if (hit.collider.CompareTag("Connection"))
             {
-                connections.Remove(hit.collider.gameObject);
+                connections.Remove(hit.collider.GetComponent<Connection>());
                 Destroy(hit.collider.gameObject);
                 Debug.Log("Remaining connections:" + connections.Count.ToString());
             }
         }
     }
 
-    private void SpawnEntities(Vector3 startPos, Vector3 endPos) {
+    private void SpawnEntities(Vector3 startPos, Vector3 endPos)
+    {
         Vector3 direction = (endPos - startPos).normalized;
         float lineLength = Vector3.Distance(startPos, endPos);
         float spacing = lineLength / (numEntites + 1);
 
-        for (int i = 1; i <= numEntites; i++) {
+        for (int i = 1; i <= numEntites; i++)
+        {
             Vector3 spawnPos = startPos + (direction * spacing * i);
             GameObject entity = Instantiate(entityPrefab, spawnPos, Quaternion.identity);
             bool movingForward;
-            if (i % 2 == 0) {
+            if (i % 2 == 0)
+            {
                 movingForward = false;
-            } else {
+            }
+            else
+            {
                 movingForward = true;
             }
             entity.GetComponent<EntityHandler>().SetupMovement(startPos, endPos, entitySpeed, movingForward);
