@@ -44,14 +44,18 @@ public class Settlement : MonoBehaviour
         passengers.Add(newEntity);
     }
 
-    public GameObject AlightPassengers(int passenger)
+    public GameObject AlightPassenger()
     {
-        GameObject transferringPassenger = passengers[passenger - 1];
-        passengers.RemoveAt(passenger - 1);
-        return transferringPassenger;
+        if (passengers.Count > 0)
+        {
+            GameObject passenger = passengers[0];
+            passengers.RemoveAt(0);
+            return passenger;
+        }
+        return null;
     }
 
-    public int HasPassengersWaiting()
+    public int GetPassengersWaiting()
     {
         return passengers.Count;
     }

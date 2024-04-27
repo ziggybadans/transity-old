@@ -14,8 +14,8 @@ public class ControlHandler : MonoBehaviour
     private bool drawing;
     private GameObject currentConnectionObject;
     private LineRenderer currentConnectionObjectLr;
-    private Vector2 startPos;
-    private Vector2 endPos;
+    private Vector2 startPos, endPos;
+    private Settlement startTown, endTown;
     private List<Connection> connections = new();
 
     private void Start()
@@ -60,6 +60,7 @@ public class ControlHandler : MonoBehaviour
 
             currentConnectionObjectLr.positionCount = 2;
             startPos = hit.collider.transform.position;
+            startTown = hit.collider.GetComponent<Settlement>();
             currentConnectionObjectLr.SetPosition(0, startPos);
             currentConnectionObjectLr.SetPosition(1, startPos);
 
@@ -77,10 +78,11 @@ public class ControlHandler : MonoBehaviour
         if (hit.collider != null && hit.collider.CompareTag("Settlement"))
         {
             endPos = hit.collider.transform.position;
+            endTown = hit.collider.GetComponent<Settlement>();
             currentConnectionObjectLr.SetPosition(1, endPos);
 
             Connection currentConnection = currentConnectionObject.AddComponent<Connection>();
-            currentConnection.SetupConnection(startPos, endPos, numEntites, entityPrefab);
+            currentConnection.SetupConnection(startPos, endPos, startTown, endTown, numEntites, entityPrefab);
             currentConnectionObject.tag = "Connection";
 
             currentConnectionObjectLr.positionCount = 2;

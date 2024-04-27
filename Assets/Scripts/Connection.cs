@@ -5,15 +5,17 @@ using UnityEngine;
 public class Connection : MonoBehaviour
 {
     private Vector2 startPos, endPos;
-    private GameObject startTown, endTown;
+    private Settlement startTown, endTown;
     private int numEntites;
     private List<GameObject> entities = new();
     private GameObject entityPrefab;
 
-    public void SetupConnection(Vector2 startPos, Vector2 endPos, int numEntites, GameObject entityPrefab)
+    public void SetupConnection(Vector2 startPos, Vector2 endPos, Settlement startTown, Settlement endTown, int numEntites, GameObject entityPrefab)
     {
         this.startPos = startPos;
         this.endPos = endPos;
+        this.startTown = startTown;
+        this.endTown = endTown;
         this.numEntites = numEntites;
         this.entityPrefab = entityPrefab;
 

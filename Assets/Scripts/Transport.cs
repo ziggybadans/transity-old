@@ -7,8 +7,6 @@ public class Transport : MonoBehaviour
 {
     public bool movingForward;
     public bool boarding;
-    int passengersWaiting;
-    int counter;
     public float entitySpeed = 1f;
     public Vector3 startPos;
     public Vector3 endPos;
@@ -17,32 +15,24 @@ public class Transport : MonoBehaviour
 
     private void Update()
     {
+        // Check to see if the transport is at a train
         Vector2 pos = transform.position;
         RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.zero);
+        // If it is at a town, wait til it's at the very end of the connection
         if (hit.collider != null && hit.collider.CompareTag("Settlement") && (pos.Equals(startPos) || pos.Equals(endPos)))
         {
-            if (!passengers.Any())
-            {
-                passengersWaiting = hit.collider.GetComponent<Settlement>().HasPassengersWaiting();
-                if (passengersWaiting > 0 && !boarding)
-                {
-                    boarding = true;
-                    counter = passengersWaiting;
-                    StartCoroutine("PassengersBoarding", hit);
-                } else if (passengersWaiting <= 0 && boarding) {
-                    boarding = false;
-                }
-            }
-            else
+            // As long as it's not already boarding, the train can start boarding
+            if (!boarding)
             {
                 boarding = true;
-                counter = passengers.Count;
-                StartCoroutine("PassengersAlighting");
+                StartCoroutine(BoardAndAlight(hit));
             }
         }
 
+        // If the train is not boarding, it can start moving
         if (!boarding)
         {
+            // Reversing direction on the connection
             if (movingForward)
             {
                 transform.position = Vector3.MoveTowards(transform.position, endPos, entitySpeed * Time.deltaTime);
@@ -56,21 +46,50 @@ public class Transport : MonoBehaviour
         }
     }
 
-    private IEnumerator PassengersBoarding(RaycastHit2D hit)
+    private IEnumerator BoardAndAlight(RaycastHit2D hit)
     {
-        while (passengersWaiting > 0)
+        // Wait for a maximum of 10 seconds
+        float elapsedTime = 0f;
+        while (elapsedTime < 10f)
         {
-            GameObject passenger = hit.collider.GetComponent<Settlement>().AlightPassengers(counter);
-            passengers.Add(passenger);
+            // Check if there are passengers waiting to board
+            int passengersWaiting = hit.collider.GetComponent<Settlement>().GetPassengersWaiting();
+            if (passengersWaiting > 0)
+            {
+                // Board passengers one by one
+                StartCoroutine(PassengersBoarding(hit.collider.GetComponent<Settlement>()));
+            }
+
+            // Check if there are passengers on board
+            if (passengers.Count > 0)
+            {
+                // Alight passengers one by one
+                StartCoroutine(PassengersAlighting());
+            }
+
+            // Wait for 1 second before checking again
             yield return new WaitForSeconds(1f);
-            counter--;
+            elapsedTime += 1f;
         }
+
+        // Reset boarding flag and resume movement
+        boarding = false;
     }
 
-    private IEnumerator PassengersAlighting() {
-        Destroy(passengers[counter]);
-        passengers.RemoveAt(counter);
+    private IEnumerator PassengersBoarding(Settlement settlement)
+    {
+        GameObject passenger = settlement.AlightPassenger();
+        passengers.Add(passenger);
         yield return new WaitForSeconds(1f);
-        counter--;
     }
+
+    private IEnumerator PassengersAlighting()
+    {
+        GameObject passenger = passengers[0];
+        passengers.RemoveAt(0);
+        Destroy(passenger);
+        yield return new WaitForSeconds(1f);
+    }
+
+
 }
