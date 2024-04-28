@@ -31,6 +31,7 @@ public class Connection : MonoBehaviour
         for (int i = 1; i <= numEntites; i++)
         {
             Vector3 spawnPos = startPos + (direction * spacing * i);
+            spawnPos.z = -2f;
             GameObject entity = Instantiate(entityPrefab, spawnPos, Quaternion.identity);
             entities.Add(entity);
             if (i % 2 == 0)

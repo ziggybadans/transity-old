@@ -62,6 +62,9 @@ public class Settlement : MonoBehaviour
 
 
         GameObject newEntity = Instantiate(entityPrefab, spawnPosition, Quaternion.identity);
+        Vector3 currentPos = newEntity.transform.position;
+        currentPos.z = -3f;
+        newEntity.transform.position = currentPos;
         Passenger newPassenger = newEntity.GetComponent<Passenger>();
         newPassenger.origin = this;
         if (lineCutoff)
