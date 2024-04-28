@@ -79,25 +79,32 @@ public class ControlHandler : MonoBehaviour
         {
             endPos = hit.collider.transform.position;
             endTown = hit.collider.GetComponent<Settlement>();
-            currentConnectionObjectLr.SetPosition(1, endPos);
+            if (startTown != endTown)
+            {
+                currentConnectionObjectLr.SetPosition(1, endPos);
 
-            Connection currentConnection = currentConnectionObject.AddComponent<Connection>();
-            currentConnection.SetupConnection(startPos, endPos, startTown, endTown, numEntites, entityPrefab);
-            currentConnectionObject.tag = "Connection";
+                Connection currentConnection = currentConnectionObject.AddComponent<Connection>();
+                currentConnection.SetupConnection(startPos, endPos, startTown, endTown, numEntites, entityPrefab);
+                currentConnectionObject.tag = "Connection";
 
-            currentConnectionObjectLr.positionCount = 2;
-            currentConnectionObjectLr.SetPosition(0, startPos);
-            currentConnectionObjectLr.SetPosition(1, endPos);
-            currentConnectionObjectLr.startWidth = lineWidth;
-            currentConnectionObjectLr.endWidth = lineWidth;
-            currentConnectionObjectLr.material = lineMaterial;
+                currentConnectionObjectLr.positionCount = 2;
+                currentConnectionObjectLr.SetPosition(0, startPos);
+                currentConnectionObjectLr.SetPosition(1, endPos);
+                currentConnectionObjectLr.startWidth = lineWidth;
+                currentConnectionObjectLr.endWidth = lineWidth;
+                currentConnectionObjectLr.material = lineMaterial;
 
-            MeshCollider connectionMesh = currentConnectionObject.AddComponent<MeshCollider>();
-            Mesh mesh = new Mesh();
-            currentConnectionObjectLr.BakeMesh(mesh, cam, true);
-            connectionMesh.sharedMesh = mesh;
+                MeshCollider connectionMesh = currentConnectionObject.AddComponent<MeshCollider>();
+                Mesh mesh = new Mesh();
+                currentConnectionObjectLr.BakeMesh(mesh, cam, true);
+                connectionMesh.sharedMesh = mesh;
 
-            connections.Add(currentConnection);
+                connections.Add(currentConnection);
+            }
+            else
+            {
+                Destroy(currentConnectionObject);
+            }
         }
         else
         {
