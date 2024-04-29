@@ -25,6 +25,11 @@ public class Settlement : MonoBehaviour
         StartCoroutine(SpawnEntitiesCoroutine());
     }
 
+    private void Update()
+    {
+        SetPassengerOpacity();
+    }
+
     private IEnumerator SpawnEntitiesCoroutine()
     {
         while (true)
@@ -42,7 +47,6 @@ public class Settlement : MonoBehaviour
 
         Passenger newPassenger = SetupNewPassenger(newEntity);
         SetPassengerSprite(newPassenger);
-        SetPassengerOpacity(newPassenger);
 
         passengers.Add(newPassenger);
     }
@@ -103,17 +107,55 @@ public class Settlement : MonoBehaviour
         }
     }
 
-    private void SetPassengerOpacity(Passenger passenger)
+    private void SetPassengerOpacity()
     {
         int passengerCount = passengers.Count;
-        float opacity = 1f;
-
-        if (passengerCount >= 7)
+        if (passengerCount <= 10)
         {
-            opacity = Mathf.Clamp01(1f - ((passengerCount - 6) * 0.25f));
+            for (int i = 0; i < passengerCount; i++)
+            {
+                passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
+            }
         }
-
-        passenger.GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, opacity);
+        else if (passengerCount == 11)
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
+            }
+            passengers[9].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.75f);
+            for (int i = 10; i < passengerCount; i++)
+            {
+                passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0f);
+            }
+        }
+        else if (passengerCount == 12)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
+            }
+            passengers[9].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.5f);
+            passengers[8].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.75f);
+            for (int i = 10; i < passengerCount; i++)
+            {
+                passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0f);
+            }
+        }
+        else if (passengerCount >= 13)
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
+            }
+            passengers[9].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.25f);
+            passengers[8].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.5f);
+            passengers[7].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.75f);
+            for (int i = 10; i < passengerCount; i++)
+            {
+                passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0f);
+            }
+        }
     }
 
     public Passenger AlightPassenger()
@@ -129,7 +171,6 @@ public class Settlement : MonoBehaviour
                 Passenger currentPassenger = passengers[i];
                 Vector3 newPosition = CalculatePassengerPosition(i);
                 currentPassenger.transform.position = newPosition;
-                SetPassengerOpacity(currentPassenger);
             }
 
             return passengerAlighting;
