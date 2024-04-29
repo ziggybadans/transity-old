@@ -44,6 +44,8 @@ public class Connection : MonoBehaviour
             }
             entity.GetComponent<Transport>().startPos = startPos;
             entity.GetComponent<Transport>().endPos = endPos;
+            entity.GetComponent<Transport>().startTown = startTown;
+            entity.GetComponent<Transport>().endTown = endTown;
 
             yield return new WaitForSeconds(0.1f);
         }

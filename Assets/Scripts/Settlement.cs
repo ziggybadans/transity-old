@@ -95,6 +95,18 @@ public class Settlement : MonoBehaviour
                 newPassenger.destination = settlements[randomValue];
             }
         }
+        if (newPassenger.destination.Type == SettlementType.City)
+        {
+            newPassenger.GetComponent<SpriteRenderer>().sprite = newPassenger.citySprite;
+        }
+        else if (newPassenger.destination.Type == SettlementType.RegularTown)
+        {
+            newPassenger.GetComponent<SpriteRenderer>().sprite = newPassenger.townSprite;
+        }
+        else if (newPassenger.destination.Type == SettlementType.RuralTown)
+        {
+            newPassenger.GetComponent<SpriteRenderer>().sprite = newPassenger.ruralSprite;
+        }
 
         if (lineCutoff)
         {

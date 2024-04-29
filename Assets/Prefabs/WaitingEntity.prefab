@@ -99,3 +99,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 349db262e8c8ec04eab3e486300748cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  origin: {fileID: 0}
+  destination: {fileID: 0}
+  citySprite: {fileID: 6146807596959825244, guid: 630e3e47aca37a64bac4e731f93d145a, type: 3}
+  townSprite: {fileID: 2107017055449867365, guid: d4e1a1c8244c47c49bea7816e3e38233, type: 3}
+  ruralSprite: {fileID: -4696721617447184003, guid: a4ab0c5ea59c17447a9259f587acfee1, type: 3}

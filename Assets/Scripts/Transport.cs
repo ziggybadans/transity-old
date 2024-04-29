@@ -11,8 +11,8 @@ public class Transport : MonoBehaviour
     public int boarding = 0;
     public float entitySpeed = 1f;
     public int capacity = 6;
-    public Vector3 startPos;
-    public Vector3 endPos;
+    public Vector3 startPos, endPos;
+    public Settlement startTown, endTown;
     private GameObject childObj;
 
     public List<Passenger> passengers = new();
@@ -127,7 +127,6 @@ public class Transport : MonoBehaviour
 
     private void PassengersBoarding(Settlement settlement)
     {
-
         Passenger passenger = settlement.AlightPassenger();
         if (passenger != null)
         {
