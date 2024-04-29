@@ -5,13 +5,20 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum SettlementType {
+    City,
+    RegularTown,
+    RuralTown
+}
+
 public class Settlement : MonoBehaviour
 {
     public GameObject entityPrefab;
-    public Text textComponent;
-    public float spawnInterval = 5f;
+    public float spawnInterval = 3f;
 
     public List<Passenger> passengers = new();
+
+    public SettlementType Type { get; set; }
 
     private void Start()
     {
