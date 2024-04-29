@@ -5,7 +5,8 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum SettlementType {
+public enum SettlementType
+{
     City,
     RegularTown,
     RuralTown
@@ -14,6 +15,7 @@ public enum SettlementType {
 public class Settlement : MonoBehaviour
 {
     public GameObject entityPrefab;
+    public GameObject map;
     public float spawnInterval = 3f;
 
     public List<Passenger> passengers = new();
@@ -67,13 +69,33 @@ public class Settlement : MonoBehaviour
             lineCutoff = true;
         }
 
-
         GameObject newEntity = Instantiate(entityPrefab, spawnPosition, Quaternion.identity);
         Vector3 currentPos = newEntity.transform.position;
         currentPos.z = -3f;
         newEntity.transform.position = currentPos;
         Passenger newPassenger = newEntity.GetComponent<Passenger>();
         newPassenger.origin = this;
+        List<Settlement> settlements = map.GetComponent<MapGenerator>().settlements;
+        while (newPassenger.destination == null)
+        {
+            int randomValue = Mathf.RoundToInt(UnityEngine.Random.Range(0, settlements.Count - 1));
+            if (settlements[randomValue] == newPassenger.origin)
+            {
+                if (randomValue >= settlements.Count)
+                {
+                    newPassenger.destination = settlements[randomValue - 1];
+                }
+                else
+                {
+                    newPassenger.destination = settlements[randomValue + 1];
+                }
+            }
+            else
+            {
+                newPassenger.destination = settlements[randomValue];
+            }
+        }
+
         if (lineCutoff)
         {
             if (passengers.Count == 7)

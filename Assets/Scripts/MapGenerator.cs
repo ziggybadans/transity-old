@@ -32,6 +32,7 @@ public class MapGenerator : MonoBehaviour
         Settlement city = Instantiate(cityPrefab, GetRandomPosition(), Quaternion.identity);
         city.Type = SettlementType.City;
         city.entityPrefab = entityPrefab;
+        city.map = gameObject;
         settlements.Add(city);
 
         // Generate the remaining towns
@@ -43,6 +44,7 @@ public class MapGenerator : MonoBehaviour
                 Settlement town = Instantiate(townPrefab, GetRandomPosition(), Quaternion.identity);
                 town.Type = type;
                 town.entityPrefab = entityPrefab;
+                town.map = gameObject;
                 settlements.Add(town);
             }
             else
@@ -51,6 +53,7 @@ public class MapGenerator : MonoBehaviour
                 Settlement ruralTown = Instantiate(ruralPrefab, GetRandomPosition(), Quaternion.identity);
                 ruralTown.Type = type;
                 ruralTown.entityPrefab = entityPrefab;
+                ruralTown.map = gameObject;
                 settlements.Add(ruralTown);
             }
         }
@@ -96,8 +99,8 @@ public class MapGenerator : MonoBehaviour
 
         // Adjust the camera orthographic size to fit the map
         float aspectRatio = (float)Screen.width / Screen.height;
-        float mapWidth = mapBounds.size.x * 1.2f;
-        float mapHeight = mapBounds.size.y * 1.2f;
+        float mapWidth = mapBounds.size.x * 1.3f;
+        float mapHeight = mapBounds.size.y * 1.3f;
         float requiredSize = Mathf.Max(mapWidth / aspectRatio, mapHeight) * 0.5f;
         cam.orthographicSize = Mathf.Max(requiredSize, cam.orthographicSize);
     }
