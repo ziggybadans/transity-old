@@ -128,13 +128,12 @@ public class Transport : MonoBehaviour
 
     private void PassengersBoarding(Settlement settlement)
     {
-        Passenger passenger = settlement.AlightPassenger();
+        Passenger passenger = settlement.AlightPassenger(this);
         if (passenger != null)
         {
             passengers.Add(passenger);
             passenger.gameObject.transform.localScale *= 0.35f;
             passenger.GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
-            passenger.gameObject.SetActive(true);
             Debug.Log("New passenger boarded! Number of passengers: " + passengers.Count);
         }
     }

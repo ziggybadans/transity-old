@@ -50,13 +50,19 @@ public class Settlement : MonoBehaviour
         passengers.Add(newPassenger);
     }
 
-    private void CalculatePosition() {
-        for (int i = 0; i < passengers.Count; i++) {
-            if (i == 0) {
+    private void CalculatePosition()
+    {
+        for (int i = 0; i < passengers.Count; i++)
+        {
+            if (i == 0)
+            {
                 passengers[i].gameObject.transform.position = new Vector2(transform.position.x, transform.position.y) + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.up * 0.5f);
-            } else {
-                passengers[i].gameObject.transform.position = passengers[i - 1].transform.position + (Vector3.left * passengers[i-1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-                if (i == 5) {
+            }
+            else
+            {
+                passengers[i].gameObject.transform.position = passengers[i - 1].transform.position + (Vector3.left * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
+                if (i == 5)
+                {
                     passengers[i].gameObject.transform.position = new Vector2(transform.position.x, transform.position.y) + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.down * 0.1f);
                 }
             }
@@ -146,15 +152,24 @@ public class Settlement : MonoBehaviour
         }
     }
 
-    public Passenger AlightPassenger()
+    public Passenger AlightPassenger(Transport transport)
     {
         if (passengers.Count > 0)
         {
-            Passenger passengerAlighting = passengers[0];
-            passengerAlighting.gameObject.SetActive(false);
-            passengers.Remove(passengerAlighting);
-
-            return passengerAlighting;
+            int i = 0;
+            while (i < passengers.Count)
+            {
+                if (passengers[i].destination == transport.startTown || passengers[i].destination == transport.endTown)
+                {
+                    Passenger passengerAlighting = passengers[i];
+                    passengers.Remove(passengerAlighting);
+                    return passengerAlighting;
+                }
+                else
+                {
+                    i++;
+                }
+            }
         }
 
         return null;
