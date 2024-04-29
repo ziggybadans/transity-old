@@ -17,9 +17,7 @@ public class Settlement : MonoBehaviour
     public GameObject entityPrefab;
     public GameObject map;
     public float spawnInterval = 3f;
-
     public List<Passenger> passengers = new();
-
     public SettlementType Type { get; set; }
 
     private void Start()

@@ -34,14 +34,8 @@ public class Connection : MonoBehaviour
             spawnPos.z = -2f;
             GameObject entity = Instantiate(entityPrefab, spawnPos, Quaternion.identity);
             entities.Add(entity);
-            if (i % 2 == 0)
-            {
-                entity.GetComponent<Transport>().movingForward = false;
-            }
-            else
-            {
-                entity.GetComponent<Transport>().movingForward = true;
-            }
+            
+            entity.GetComponent<Transport>().movingForward = (i % 2 != 0);
             entity.GetComponent<Transport>().startPos = startPos;
             entity.GetComponent<Transport>().endPos = endPos;
             entity.GetComponent<Transport>().startTown = startTown;

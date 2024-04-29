@@ -46,6 +46,26 @@ public class ControlHandler : MonoBehaviour
         }
     }
 
+    private void ConfigureLineRenderer(LineRenderer lr, Vector3 startPos, Vector3 endPos)
+    {
+        lr.positionCount = 2;
+        lr.SetPosition(0, startPos);
+        lr.SetPosition(1, endPos);
+        lr.startWidth = lineWidth;
+        lr.endWidth = lineWidth;
+        lr.material = lineMaterial;
+    }
+
+    private void SetupConnectionVisuals(LineRenderer lr, Vector3 startPos, Vector3 endPos)
+    {
+        ConfigureLineRenderer(lr, startPos, endPos);
+
+        MeshCollider connectionMesh = currentConnectionObject.AddComponent<MeshCollider>();
+        Mesh mesh = new Mesh();
+        lr.BakeMesh(mesh, cam, true);
+        connectionMesh.sharedMesh = mesh;
+    }
+
     private void DrawConnection()
     {
         Vector2 clickPos = cam.ScreenToWorldPoint(Input.mousePosition);
@@ -58,15 +78,10 @@ public class ControlHandler : MonoBehaviour
             currentConnectionObject = new GameObject("Connection");
             currentConnectionObjectLr = currentConnectionObject.AddComponent<LineRenderer>();
 
-            currentConnectionObjectLr.positionCount = 2;
             startPos = hit.collider.transform.position;
             startTown = hit.collider.GetComponent<Settlement>();
-            currentConnectionObjectLr.SetPosition(0, startPos);
-            currentConnectionObjectLr.SetPosition(1, startPos);
 
-            currentConnectionObjectLr.startWidth = lineWidth;
-            currentConnectionObjectLr.endWidth = lineWidth;
-            currentConnectionObjectLr.material = lineMaterial;
+            ConfigureLineRenderer(currentConnectionObjectLr, startPos, startPos);
         }
     }
 
@@ -87,17 +102,7 @@ public class ControlHandler : MonoBehaviour
                 currentConnection.SetupConnection(startPos, endPos, startTown, endTown, numEntites, entityPrefab);
                 currentConnectionObject.tag = "Connection";
 
-                currentConnectionObjectLr.positionCount = 2;
-                currentConnectionObjectLr.SetPosition(0, startPos);
-                currentConnectionObjectLr.SetPosition(1, endPos);
-                currentConnectionObjectLr.startWidth = lineWidth;
-                currentConnectionObjectLr.endWidth = lineWidth;
-                currentConnectionObjectLr.material = lineMaterial;
-
-                MeshCollider connectionMesh = currentConnectionObject.AddComponent<MeshCollider>();
-                Mesh mesh = new Mesh();
-                currentConnectionObjectLr.BakeMesh(mesh, cam, true);
-                connectionMesh.sharedMesh = mesh;
+                SetupConnectionVisuals(currentConnectionObjectLr, startPos, endPos);
 
                 connections.Add(currentConnection);
             }
