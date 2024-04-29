@@ -28,6 +28,7 @@ public class Settlement : MonoBehaviour
     private void Update()
     {
         SetPassengerOpacity();
+        CalculatePosition();
     }
 
     private IEnumerator SpawnEntitiesCoroutine()
@@ -41,9 +42,7 @@ public class Settlement : MonoBehaviour
 
     private void SpawnEntity()
     {
-        Vector2 spawnPosition = CalculateSpawnPosition();
-        GameObject newEntity = Instantiate(entityPrefab, spawnPosition, Quaternion.identity);
-        newEntity.transform.position = new Vector3(newEntity.transform.position.x, newEntity.transform.position.y, -3f);
+        GameObject newEntity = Instantiate(entityPrefab, new Vector3(transform.position.x, transform.position.y, -3f), Quaternion.identity);
 
         Passenger newPassenger = SetupNewPassenger(newEntity);
         SetPassengerSprite(newPassenger);
@@ -51,28 +50,17 @@ public class Settlement : MonoBehaviour
         passengers.Add(newPassenger);
     }
 
-    private Vector2 CalculateSpawnPosition()
-    {
-        Vector2 spawnPosition = transform.position;
-        int passengerCount = passengers.Count;
-
-        if (passengerCount == 0)
-        {
-            spawnPosition += (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.up * 0.5f);
-        }
-        else
-        {
-            Passenger lastPassenger = passengers[passengerCount - 1];
-            spawnPosition = lastPassenger.transform.position + (Vector3.left * lastPassenger.GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-
-            if (passengerCount == 5)
-            {
-                Vector2 originalSpawnPos = transform.position;
-                spawnPosition = originalSpawnPos + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.down * 0.1f);
+    private void CalculatePosition() {
+        for (int i = 0; i < passengers.Count; i++) {
+            if (i == 0) {
+                passengers[i].gameObject.transform.position = new Vector2(transform.position.x, transform.position.y) + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.up * 0.5f);
+            } else {
+                passengers[i].gameObject.transform.position = passengers[i - 1].transform.position + (Vector3.left * passengers[i-1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
+                if (i == 5) {
+                    passengers[i].gameObject.transform.position = new Vector2(transform.position.x, transform.position.y) + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.down * 0.1f);
+                }
             }
         }
-
-        return spawnPosition;
     }
 
     private Passenger SetupNewPassenger(GameObject newEntity)
@@ -166,37 +154,10 @@ public class Settlement : MonoBehaviour
             passengerAlighting.gameObject.SetActive(false);
             passengers.Remove(passengerAlighting);
 
-            for (int i = 0; i < passengers.Count; i++)
-            {
-                Passenger currentPassenger = passengers[i];
-                Vector3 newPosition = CalculatePassengerPosition(i);
-                currentPassenger.transform.position = newPosition;
-            }
-
             return passengerAlighting;
         }
 
         return null;
-    }
-
-    private Vector3 CalculatePassengerPosition(int index)
-    {
-        if (index == 0)
-        {
-            return transform.position + (Vector3.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector3.up * 0.5f);
-        }
-        else if (index < 5)
-        {
-            return passengers[index - 1].transform.position + (Vector3.left * passengers[index - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-        }
-        else if (index == 5)
-        {
-            return transform.position + (Vector3.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector3.down * 0.1f);
-        }
-        else
-        {
-            return passengers[index - 1].transform.position + (Vector3.left * passengers[index - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-        }
     }
 
     public int GetPassengersWaiting()
