@@ -28,6 +28,56 @@ public class Transport : MonoBehaviour
 
     private void Update()
     {
+        PositionPassengers();
+
+        // Check to see if the transport is at a train
+        Vector2 pos = transform.position;
+        RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.zero);
+        if ((pos.Equals(startPos) && startTown != null) || (pos.Equals(endPos) && endTown != null))
+        {
+            // As long as it's not already boarding, the train can start boarding
+            if (boarding == 0)
+            {
+                boarding = 1;
+                StartCoroutine(BoardAndAlight(pos.Equals(startPos) ? startTown : endTown));
+            }
+        }
+        else
+        {
+            // Reversing direction on the connection
+            if (movingForward)
+            {
+                MoveTransport(endPos);
+                if (transform.position.Equals(endPos)) movingForward = false;
+            }
+            else
+            {
+                MoveTransport(startPos);
+                if (transform.position.Equals(startPos)) movingForward = true;
+            }
+        }
+
+        if (boarding == 2)
+        {
+            if (movingForward)
+            {
+                MoveTransport(endPos);
+                if (transform.position.Equals(endPos)) movingForward = false;
+            }
+            else
+            {
+                MoveTransport(startPos);
+                if (transform.position.Equals(startPos)) movingForward = true;
+            }
+            if (!(hit.collider != null && hit.collider.CompareTag("Settlement")))
+            {
+                boarding = 0;
+            }
+        }
+    }
+
+    private void PositionPassengers()
+    {
         for (int i = 0; i < passengers.Count; i++)
         {
             int row = i / 2;
@@ -38,84 +88,35 @@ public class Transport : MonoBehaviour
             passengers[i].transform.localPosition = passengerPosition;
             passengers[i].transform.localRotation = Quaternion.identity;
         }
-        // Check to see if the transport is at a train
-        Vector2 pos = transform.position;
-        RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.zero);
-        // If it is at a town, wait til it's at the very end of the connection
-        if (hit.collider != null && hit.collider.CompareTag("Settlement") && (pos.Equals(startPos) || pos.Equals(endPos)))
-        {
-            // As long as it's not already boarding, the train can start boarding
-            if (boarding == 0)
-            {
-                boarding = 1;
-                StartCoroutine(BoardAndAlight(hit));
-            }
-        }
-        else
-        {
-            // Reversing direction on the connection
-            if (movingForward)
-            {
-                Vector3 direction = endPos - transform.position;
-                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-                transform.rotation = Quaternion.Euler(0f, 0f, angle);
-                transform.position = Vector3.MoveTowards(transform.position, endPos, entitySpeed * Time.deltaTime);
-                if (transform.position.Equals(endPos)) movingForward = false;
-            }
-            else
-            {
-                Vector3 direction = startPos - transform.position;
-                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-                transform.rotation = Quaternion.Euler(0f, 0f, angle);
-                transform.position = Vector3.MoveTowards(transform.position, startPos, entitySpeed * Time.deltaTime);
-                if (transform.position.Equals(startPos)) movingForward = true;
-            }
-        }
-
-        if (boarding == 2)
-        {
-            if (movingForward)
-            {
-                Vector3 direction = endPos - transform.position;
-                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-                transform.rotation = Quaternion.Euler(0f, 0f, angle);
-                transform.position = Vector3.MoveTowards(transform.position, endPos, entitySpeed * Time.deltaTime);
-                if (transform.position.Equals(endPos)) movingForward = false;
-            }
-            else
-            {
-                Vector3 direction = startPos - transform.position;
-                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-                transform.rotation = Quaternion.Euler(0f, 0f, angle);
-                transform.position = Vector3.MoveTowards(transform.position, startPos, entitySpeed * Time.deltaTime);
-                if (transform.position.Equals(startPos)) movingForward = true;
-            }
-            if (!(hit.collider != null && hit.collider.CompareTag("Settlement")))
-            {
-                boarding = 0;
-            }
-        }
     }
 
-    private IEnumerator BoardAndAlight(RaycastHit2D hit)
+    private void MoveTransport(Vector3 targetPos)
+    {
+        Vector3 direction = targetPos - transform.position;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        transform.position = Vector3.MoveTowards(transform.position, targetPos, entitySpeed * Time.deltaTime);
+    }
+
+    private IEnumerator BoardAndAlight(Settlement settlement)
     {
         // Wait for a maximum of 10 seconds
         float elapsedTime = 0f;
         while (elapsedTime < 10f)
         {
             // Check if there are passengers waiting to board
-            int passengersWaiting = hit.collider.GetComponent<Settlement>().GetPassengersWaiting();
+            int passengersWaiting = settlement.GetPassengersWaiting();
             if (passengersWaiting > 0 && passengers.Count < capacity)
             {
                 // Board passengers one by one
-                PassengersBoarding(hit.collider.GetComponent<Settlement>());
+                PassengersBoarding(settlement);
             }
 
             // Check if there are passengers on board
             if (passengers.Count > 0)
             {
                 // Alight passengers one by one
-                PassengersAlighting(hit.collider.GetComponent<Settlement>());
+                PassengersAlighting(settlement);
             }
             yield return new WaitForSeconds(1f);
             elapsedTime += 1f;
@@ -140,12 +141,12 @@ public class Transport : MonoBehaviour
 
     private void PassengersAlighting(Settlement settlement)
     {
-        foreach (Passenger passenger in passengers.ToArray())
+        for (int i = passengers.Count - 1; i >= 0; i--)
         {
-            if (passenger.origin != settlement)
+            if (passengers[i].origin != settlement)
             {
-                Destroy(passenger.gameObject);
-                passengers.Remove(passenger);
+                Destroy(passengers[i].gameObject);
+                passengers.RemoveAt(i);
             }
         }
     }

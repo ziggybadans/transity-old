@@ -22,7 +22,7 @@ public class Settlement : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine("SpawnEntitiesCoroutine");
+        StartCoroutine(SpawnEntitiesCoroutine());
     }
 
     private IEnumerator SpawnEntitiesCoroutine()
@@ -36,100 +36,84 @@ public class Settlement : MonoBehaviour
 
     private void SpawnEntity()
     {
-        Vector2 spawnPosition = transform.position;
-        bool lineCutoff = false;
+        Vector2 spawnPosition = CalculateSpawnPosition();
+        GameObject newEntity = Instantiate(entityPrefab, spawnPosition, Quaternion.identity);
+        newEntity.transform.position = new Vector3(newEntity.transform.position.x, newEntity.transform.position.y, -3f);
 
-        if (passengers.Count == 0)
+        Passenger newPassenger = SetupNewPassenger(newEntity);
+        SetPassengerSprite(newPassenger);
+        SetPassengerOpacity(newPassenger);
+
+        passengers.Add(newPassenger);
+    }
+
+    private Vector2 CalculateSpawnPosition()
+    {
+        Vector2 spawnPosition = transform.position;
+        int passengerCount = passengers.Count;
+
+        if (passengerCount == 0)
         {
             spawnPosition += (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.up * 0.5f);
         }
-        if (passengers.Count > 0 && passengers.Count < 5)
-        {
-            Passenger lastEntity = passengers[passengers.Count - 1];
-            spawnPosition = lastEntity.gameObject.transform.position + (Vector3.left *
-                lastEntity.GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-        }
-        if (passengers.Count == 5)
-        {
-            spawnPosition += Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x + (Vector2.down * 0.1f);
-        }
-        if (passengers.Count > 5)
-        {
-            Passenger lastEntity = passengers[passengers.Count - 1];
-            spawnPosition = lastEntity.gameObject.transform.position + (Vector3.left *
-                lastEntity.GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-        }
-        if (passengers.Count > 6)
-        {
-            Passenger lastEntity = passengers[passengers.Count - 1];
-            spawnPosition = lastEntity.gameObject.transform.position + (Vector3.left *
-                lastEntity.GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-            lineCutoff = true;
-        }
-
-        GameObject newEntity = Instantiate(entityPrefab, spawnPosition, Quaternion.identity);
-        Vector3 currentPos = newEntity.transform.position;
-        currentPos.z = -3f;
-        newEntity.transform.position = currentPos;
-        Passenger newPassenger = newEntity.GetComponent<Passenger>();
-        newPassenger.origin = this;
-        List<Settlement> settlements = map.GetComponent<MapGenerator>().settlements;
-        while (newPassenger.destination == null)
-        {
-            int randomValue = Mathf.RoundToInt(UnityEngine.Random.Range(0, settlements.Count - 1));
-            if (settlements[randomValue] == newPassenger.origin)
-            {
-                if (randomValue >= settlements.Count)
-                {
-                    newPassenger.destination = settlements[randomValue - 1];
-                }
-                else
-                {
-                    newPassenger.destination = settlements[randomValue + 1];
-                }
-            }
-            else
-            {
-                newPassenger.destination = settlements[randomValue];
-            }
-        }
-        if (newPassenger.destination.Type == SettlementType.City)
-        {
-            newPassenger.GetComponent<SpriteRenderer>().sprite = newPassenger.citySprite;
-        }
-        else if (newPassenger.destination.Type == SettlementType.RegularTown)
-        {
-            newPassenger.GetComponent<SpriteRenderer>().sprite = newPassenger.townSprite;
-        }
-        else if (newPassenger.destination.Type == SettlementType.RuralTown)
-        {
-            newPassenger.GetComponent<SpriteRenderer>().sprite = newPassenger.ruralSprite;
-        }
-
-        if (lineCutoff)
-        {
-            if (passengers.Count == 7)
-            {
-                newEntity.GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.75f);
-            }
-            else if (passengers.Count == 8)
-            {
-                newEntity.GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.5f);
-            }
-            else if (passengers.Count == 9)
-            {
-                newEntity.GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.25f);
-            }
-            else
-            {
-                newEntity.GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0f);
-            }
-        }
         else
         {
-            newEntity.GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
+            Passenger lastPassenger = passengers[passengerCount - 1];
+            spawnPosition = lastPassenger.transform.position + (Vector3.left * lastPassenger.GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
+
+            if (passengerCount == 5)
+            {
+                Vector2 originalSpawnPos = transform.position;
+                spawnPosition = originalSpawnPos + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.down * 0.1f);
+            }
         }
-        passengers.Add(newEntity.GetComponent<Passenger>());
+
+        return spawnPosition;
+    }
+
+    private Passenger SetupNewPassenger(GameObject newEntity)
+    {
+        Passenger newPassenger = newEntity.GetComponent<Passenger>();
+        newPassenger.origin = this;
+
+        List<Settlement> settlements = map.GetComponent<MapGenerator>().settlements;
+        Settlement randomSettlement = settlements[UnityEngine.Random.Range(0, settlements.Count)];
+        while (randomSettlement == newPassenger.origin)
+        {
+            randomSettlement = settlements[UnityEngine.Random.Range(0, settlements.Count)];
+        }
+        newPassenger.destination = randomSettlement;
+
+        return newPassenger;
+    }
+
+    private void SetPassengerSprite(Passenger passenger)
+    {
+        if (passenger.destination.Type == SettlementType.City)
+        {
+            passenger.GetComponent<SpriteRenderer>().sprite = passenger.citySprite;
+        }
+        else if (passenger.destination.Type == SettlementType.RegularTown)
+        {
+            passenger.GetComponent<SpriteRenderer>().sprite = passenger.townSprite;
+        }
+        else if (passenger.destination.Type == SettlementType.RuralTown)
+        {
+            passenger.GetComponent<SpriteRenderer>().sprite = passenger.ruralSprite;
+        }
+    }
+
+    private void SetPassengerOpacity(Passenger passenger)
+    {
+        int passengerCount = passengers.Count;
+        float opacity = 1f;
+
+        if (passengerCount >= 7)
+        {
+            opacity = Mathf.Clamp01(1f - ((passengerCount - 6) * 0.25f));
+        }
+
+        passenger.GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, opacity);
     }
 
     public Passenger AlightPassenger()
@@ -139,66 +123,39 @@ public class Settlement : MonoBehaviour
             Passenger passengerAlighting = passengers[0];
             passengerAlighting.gameObject.SetActive(false);
             passengers.Remove(passengerAlighting);
+
             for (int i = 0; i < passengers.Count; i++)
             {
-                if (i == 0)
-                {
-                    passengers[i].gameObject.transform.position = transform.position +
-                        (Vector3.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector3.up * 0.5f);
-                    passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
-                }
-                else if (i > 0 && i < 5)
-                {
-                    passengers[i].gameObject.transform.position =
-                        passengers[i - 1].gameObject.transform.position +
-                        (Vector3.left * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-                    passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
-                }
-                else if (i == 5)
-                {
-                    passengers[i].gameObject.transform.position = transform.position +
-                        (Vector3.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector3.down * 0.1f);
-                    passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
-                }
-                else if (i == 6)
-                {
-                    passengers[i].gameObject.transform.position =
-                        passengers[i - 1].gameObject.transform.position +
-                        (Vector3.left * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-                    passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
-                }
-                else if (i == 7)
-                {
-                    passengers[i].gameObject.transform.position =
-                        passengers[i - 1].gameObject.transform.position +
-                        (Vector3.left * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-                    passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.75f);
-                }
-                else if (i == 8)
-                {
-                    passengers[i].gameObject.transform.position =
-                        passengers[i - 1].gameObject.transform.position +
-                        (Vector3.left * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-                    passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.5f);
-                }
-                else if (i == 9)
-                {
-                    passengers[i].gameObject.transform.position =
-                        passengers[i - 1].gameObject.transform.position +
-                        (Vector3.left * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-                    passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0.25f);
-                }
-                else if (i > 9)
-                {
-                    passengers[i].gameObject.transform.position =
-                        passengers[i - 1].gameObject.transform.position +
-                        (Vector3.left * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
-                    passengers[i].GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 0f);
-                }
+                Passenger currentPassenger = passengers[i];
+                Vector3 newPosition = CalculatePassengerPosition(i);
+                currentPassenger.transform.position = newPosition;
+                SetPassengerOpacity(currentPassenger);
             }
+
             return passengerAlighting;
         }
+
         return null;
+    }
+
+    private Vector3 CalculatePassengerPosition(int index)
+    {
+        if (index == 0)
+        {
+            return transform.position + (Vector3.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector3.up * 0.5f);
+        }
+        else if (index < 5)
+        {
+            return passengers[index - 1].transform.position + (Vector3.left * passengers[index - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
+        }
+        else if (index == 5)
+        {
+            return transform.position + (Vector3.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector3.down * 0.1f);
+        }
+        else
+        {
+            return passengers[index - 1].transform.position + (Vector3.left * passengers[index - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
+        }
     }
 
     public int GetPassengersWaiting()
