@@ -20,6 +20,7 @@ public class MapGenerator : MonoBehaviour
     public Settlement ruralPrefab;
     public GameObject entityPrefab;
     private Camera cam;
+    public GridManager grid;
     public List<Settlement> settlements = new List<Settlement>();
 
     private void Start()
