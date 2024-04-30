@@ -5,8 +5,8 @@ using UnityEngine;
 public class GridManager : MonoBehaviour
 {
     Grid grid;
-    public int gridWidth = 60;
-    public int gridHeight = 40;
+    public int gridWidth = 34;
+    public int gridHeight = 19;
     public float gridCellSize = 2f;
     public int numCellsX, numCellsY;
     private void Start() {

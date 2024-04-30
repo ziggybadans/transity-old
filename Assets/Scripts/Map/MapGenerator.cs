@@ -11,6 +11,8 @@ public class MapGenerator : MonoBehaviour
     public int minTowns = 10;
     [Range(10, 30)]
     public int maxTowns = 20;
+    [Min(1)]
+    public int numCities = 1;
     [Min(2f)]
     public int minDistance = 2;
     public Settlement cityPrefab;
@@ -19,6 +21,7 @@ public class MapGenerator : MonoBehaviour
     public GameObject entityPrefab;
     private Camera cam;
     public GridManager grid;
+    public HeatmapRenderer heatmapRenderer;
     public List<Settlement> settlements = new List<Settlement>();
 
     private void Start()
@@ -33,9 +36,10 @@ public class MapGenerator : MonoBehaviour
         // Collapse the number of towns from the range given
         int numTowns = Random.Range(minTowns, maxTowns);
 
-        // Always place at least one city
-        for (int i = 1; i < numTowns; i++)
+        // Spawning cities
+        for (int i = 1; i <= numCities; i++)
         {
+            // Always place at least one city
             if (i == 1)
             {
                 Settlement city = Instantiate(cityPrefab, GetRandomPosition(), Quaternion.identity);
@@ -44,25 +48,43 @@ public class MapGenerator : MonoBehaviour
                 city.map = gameObject;
                 settlements.Add(city);
             }
+            // Exponentially lower chance of another city when there are multiple
             else if (i > 1)
             {
-                Vector2Int firstCityPos = GetCellFromPosition(settlements[0].gameObject.transform.position);
+                float[,] spawnProbabilities = new float[grid.numCellsX, grid.numCellsY];
+                // Iterating through x coordinate of grid
                 for (int x = -grid.numCellsX; x <= grid.numCellsX; x++)
                 {
+                    // Iterating through y coordinate of grid
                     for (int y = -grid.numCellsY; y <= grid.numCellsY; y++)
                     {
-                        if (x == 0 && y == 0)
+                        // This is the cell we're currently checking
+                        Vector2Int currentCell = new Vector2Int(x, y);
+
+                        // A baseline for our probability that will decrease over the course of the check
+                        float combinedProbability = 1f;
+                        // Checking through each city
+                        foreach (Settlement settlement in settlements)
                         {
-                            continue;
+                            // Get the distance from the city to the current cell
+                            Vector2Int cityPos = GetCellFromPosition(settlement.gameObject.transform.position);
+                            int distanceX = Mathf.Abs(currentCell.x - cityPos.x);
+                            int distanceY = Mathf.Abs(currentCell.y - cityPos.y);
+                            float distance = Mathf.Sqrt(distanceX * distanceX + distanceY * distanceY);
+
+                            // Calculate the probability based on custom equation, must be above 4 squares away, ceiling probability of 50%
+                            float probability = (50f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f;
+                            combinedProbability *= (100f - probability) / 100f;
                         }
 
+                        float spawnProbability = (1f - combinedProbability) * 100f;
+                        spawnProbabilities[x, y] = spawnProbability / 100f;
+                        // If we do make it over the probability threshold, then we spawn the city, as long as it is within the bounds of the map
                         int r = Random.Range(0, 100);
-                        float distance = Mathf.Sqrt(x * x + y * y);
-                        float equation = (50f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f;
-                        if (equation > r)
+                        if (spawnProbability > r)
                         {
-                            int targetX = firstCityPos.x + x;
-                            int targetY = firstCityPos.y + y;
+                            int targetX = currentCell.x;
+                            int targetY = currentCell.y;
 
                             if (targetX >= 0 && targetX < grid.numCellsX && targetY >= 0 && targetY < grid.numCellsY)
                             {
@@ -72,6 +94,14 @@ public class MapGenerator : MonoBehaviour
                                 city.map = gameObject;
                                 settlements.Add(city);
                             }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
                 }
@@ -82,6 +112,7 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
+        /*
         for (int i = 1; i < numTowns; i++)
         {
             if (Random.value < 0.75f)
@@ -107,6 +138,7 @@ public class MapGenerator : MonoBehaviour
                 i--;
             }
         }
+        */
 
         /*
         // Adjust positions to ensure minimum distance between towns

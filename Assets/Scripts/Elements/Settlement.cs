@@ -22,7 +22,7 @@ public class Settlement : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(SpawnEntitiesCoroutine());
+        //StartCoroutine(SpawnEntitiesCoroutine());
     }
 
     private void Update()
