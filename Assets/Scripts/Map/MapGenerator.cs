@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.Intrinsics;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
+using UnityEngine.Rendering.UI;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -10,11 +12,7 @@ public class MapGenerator : MonoBehaviour
     [Range(10, 30)]
     public int maxTowns = 20;
     [Min(2f)]
-    public float minDistanceBetweenTowns = 2f;
-    [Range(10f, 100f)]
-    public float mapWidth = 10f;
-    [Range(10f, 100f)]
-    public float mapHeight = 10f;
+    public int minDistance = 2;
     public Settlement cityPrefab;
     public Settlement townPrefab;
     public Settlement ruralPrefab;
@@ -28,13 +26,14 @@ public class MapGenerator : MonoBehaviour
         cam = Camera.main;
 
         GenerateMap();
-        SetupView();
     }
 
     private void GenerateMap()
     {
+        // Collapse the number of towns from the range given
         int numTowns = Random.Range(minTowns, maxTowns);
 
+        // Always place at least one city
         for (int i = 1; i < numTowns; i++)
         {
             if (i == 1)
@@ -45,13 +44,37 @@ public class MapGenerator : MonoBehaviour
                 city.map = gameObject;
                 settlements.Add(city);
             }
-            else if (Random.value < (0.5f / (i - 1)))
+            else if (i > 1)
             {
-                Settlement city = Instantiate(cityPrefab, GetRandomPosition(), Quaternion.identity);
-                city.Type = SettlementType.City;
-                city.entityPrefab = entityPrefab;
-                city.map = gameObject;
-                settlements.Add(city);
+                Vector2Int firstCityPos = GetCellFromPosition(settlements[0].gameObject.transform.position);
+                for (int x = -grid.numCellsX; x <= grid.numCellsX; x++)
+                {
+                    for (int y = -grid.numCellsY; y <= grid.numCellsY; y++)
+                    {
+                        if (x == 0 && y == 0)
+                        {
+                            continue;
+                        }
+
+                        int r = Random.Range(0, 100);
+                        float distance = Mathf.Sqrt(x * x + y * y);
+                        float equation = (50f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f;
+                        if (equation > r)
+                        {
+                            int targetX = firstCityPos.x + x;
+                            int targetY = firstCityPos.y + y;
+
+                            if (targetX >= 0 && targetX < grid.numCellsX && targetY >= 0 && targetY < grid.numCellsY)
+                            {
+                                Settlement city = Instantiate(cityPrefab, new Vector2(targetX, targetY), Quaternion.identity);
+                                city.Type = SettlementType.City;
+                                city.entityPrefab = entityPrefab;
+                                city.map = gameObject;
+                                settlements.Add(city);
+                            }
+                        }
+                    }
+                }
             }
             else
             {
@@ -85,6 +108,7 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
+        /*
         // Adjust positions to ensure minimum distance between towns
         for (int i = 0; i < settlements.Count; i++)
         {
@@ -107,43 +131,26 @@ public class MapGenerator : MonoBehaviour
                 }
             }
         }
-
-        Vector2 cameraPosition = cam.transform.position;
-        for (int i = 0; i < settlements.Count; i++) {
-            Settlement town = settlements[i];
-            Vector2 position = town.transform.position;
-            position -= cameraPosition;
-            town.transform.position = position;
-        }
-    }
-
-    private void SetupView()
-    {
-        // Calculate the bounds of the map
-        Bounds mapBounds = new(settlements[0].transform.position, Vector3.zero);
-        foreach (Settlement settlement in settlements)
-        {
-            mapBounds.Encapsulate(settlement.transform.position);
-        }
-
-        // Calculate the offset to center the map on the camera
-        Vector2 mapCenter = mapBounds.center;
-        Vector2 cameraPosition = cam.transform.position;
-        Vector2 offset = cameraPosition - mapCenter;
-
-        // Apply the offset to the positions of the settlements
-        for (int i = 0; i < settlements.Count; i++) {
-            Settlement town = settlements[i];
-            Vector2 position = town.transform.position;
-            position += offset;
-            town.transform.position = position;
-        }
+        */
     }
 
     private Vector2 GetRandomPosition()
     {
-        float x = Random.Range(0f, mapWidth);
-        float y = Random.Range(0f, mapHeight);
-        return new Vector2(x, y);
+        int randomCellX = Random.Range(0, grid.numCellsX * 2);
+        int randomCellY = Random.Range(0, grid.numCellsY * 2);
+
+        float townX = randomCellX * grid.gridCellSize + (grid.gridCellSize / 2f);
+        float townY = randomCellY * grid.gridCellSize + (grid.gridCellSize / 2f);
+
+        Vector2 townPosition = new Vector2(townX, townY);
+        return townPosition;
+    }
+
+    private Vector2Int GetCellFromPosition(Vector2 position)
+    {
+        int cellX = Mathf.FloorToInt(position.x / grid.gridCellSize);
+        int cellY = Mathf.FloorToInt(position.y / grid.gridCellSize);
+
+        return new Vector2Int(cellX, cellY);
     }
 }
