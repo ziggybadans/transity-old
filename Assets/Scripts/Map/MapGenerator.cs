@@ -106,6 +106,14 @@ public class MapGenerator : MonoBehaviour
                 }
             }
         }
+
+        Vector2 cameraPosition = cam.transform.position;
+        for (int i = 0; i < settlements.Count; i++) {
+            Settlement town = settlements[i];
+            Vector2 position = town.transform.position;
+            position -= cameraPosition;
+            town.transform.position = position;
+        }
     }
 
     private void SetupView()
@@ -117,14 +125,18 @@ public class MapGenerator : MonoBehaviour
             mapBounds.Encapsulate(settlement.transform.position);
         }
 
-        // Calculate the centre of the map
+        // Calculate the offset to center the map on the camera
         Vector2 mapCenter = mapBounds.center;
+        Vector2 cameraPosition = cam.transform.position;
+        Vector2 offset = cameraPosition - mapCenter;
 
-        // Adjust the camera position to center the map
-        Vector3 cameraPosition = cam.transform.position;
-        cameraPosition.x = mapCenter.x;
-        cameraPosition.y = mapCenter.y;
-        cam.transform.position = cameraPosition;
+        // Apply the offset to the positions of the settlements
+        for (int i = 0; i < settlements.Count; i++) {
+            Settlement town = settlements[i];
+            Vector2 position = town.transform.position;
+            position += offset;
+            town.transform.position = position;
+        }
     }
 
     private Vector2 GetRandomPosition()
