@@ -6,11 +6,13 @@ using UnityEngine;
 public class ControlHandler : MonoBehaviour
 {
     public Material lineMaterial;
-    private Camera cam;
     public GameObject entityPrefab;
     public float lineWidth = 0.5f;
     public int numEntites = 2;
 
+    private Camera cam;
+    private int zoomLevel = 0;
+    private int zoomTimer = 0;
     private bool drawing;
     private GameObject currentConnectionObject;
     private LineRenderer currentConnectionObjectLr;
@@ -43,6 +45,38 @@ public class ControlHandler : MonoBehaviour
         if (Input.GetMouseButtonDown(1) && !drawing)
         {
             DeleteConnection();
+        }
+
+        if (zoomTimer == 2) zoomTimer = 0;
+        if (zoomTimer == 0)
+        {
+            if (Input.GetKey("="))
+            {
+                if (zoomLevel < 2)
+                {
+                    zoomLevel++;
+                }
+                Debug.Log("Zoom level: " + zoomLevel);
+                StartCoroutine("timeSinceZoom");
+            }
+            else if (Input.GetKey("-"))
+            {
+                if (zoomLevel > 0)
+                {
+                    zoomLevel--;
+                }
+                Debug.Log("Zoom level: " + zoomLevel);
+                StartCoroutine("timeSinceZoom");
+            }
+        }
+    }
+
+    private IEnumerator timeSinceZoom()
+    {
+        while (zoomTimer <= 2)
+        {
+            zoomTimer++;
+            yield return new WaitForSeconds(1f);
         }
     }
 
