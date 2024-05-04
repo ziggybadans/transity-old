@@ -441,7 +441,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minTowns: 15
   maxTowns: 30
-  numCities: 1
+  numCities: 3
   minDistance: 2
   cityPrefab: {fileID: 8973645820326527544, guid: 5c841679eb1505744a3f8d8013220fc8, type: 3}
   townPrefab: {fileID: 4089331150821525441, guid: 5abee34604d82ce4c8cf7ba2122daefa, type: 3}
@@ -449,7 +449,7 @@ MonoBehaviour:
   entityPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
   textPrefab: {fileID: 2333067529079232155, guid: bf1427a9fb80bf142ae3f2090286de02, type: 3}
   gridParent: {fileID: 2147010513}
-  grid: {fileID: 1672888328}
+  grid: {fileID: 1672888330}
   settlements: []
 --- !u!4 &781129548
 Transform:
@@ -519,7 +519,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1672888329}
-  - component: {fileID: 1672888328}
+  - component: {fileID: 1672888330}
   m_Layer: 0
   m_Name: Grid
   m_TagString: Untagged
@@ -527,21 +527,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1672888328
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1672888327}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ce34077cbd1fdd42933a5acdbdeb090, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gridWidth: 34
-  gridHeight: 19
-  gridCellSize: 2
 --- !u!4 &1672888329
 Transform:
   m_ObjectHideFlags: 0
@@ -557,6 +542,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1672888330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1672888327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce34077cbd1fdd42933a5acdbdeb090, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridWidth: 34
+  gridHeight: 19
+  gridCellSize: 2
 --- !u!1 &1789311885
 GameObject:
   m_ObjectHideFlags: 0
