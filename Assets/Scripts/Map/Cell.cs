@@ -11,12 +11,12 @@ public class Cell : MonoBehaviour
     public List<TextMeshProUGUI> debugProbability = new();
     public float settlementSpawnProbability;
     public float cellSize;
-    public Vector3 centre;
+    public Vector3Int centre;
 
     private void Start() {
         int x = (int)(transform.position.x * cellSize + (cellSize / 2f));
         int y = (int)(transform.position.y * cellSize + (cellSize / 2f));
-        centre = new Vector3(x, y);
+        centre = new Vector3Int(x, y);
     }
 
     public bool HasSettlement() {

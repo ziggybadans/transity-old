@@ -441,7 +441,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minTowns: 15
   maxTowns: 30
-  numCities: 3
+  numCities: 1
   minDistance: 2
   cityPrefab: {fileID: 8973645820326527544, guid: 5c841679eb1505744a3f8d8013220fc8, type: 3}
   townPrefab: {fileID: 4089331150821525441, guid: 5abee34604d82ce4c8cf7ba2122daefa, type: 3}
@@ -513,6 +513,7 @@ MonoBehaviour:
   gridWidth: 34
   gridHeight: 19
   gridCellSize: 2
+  cellSprite: {fileID: 6750033715232265413, guid: 674d1f549fb449940ab5715e977770a9, type: 3}
 --- !u!1 &1789311885
 GameObject:
   m_ObjectHideFlags: 0

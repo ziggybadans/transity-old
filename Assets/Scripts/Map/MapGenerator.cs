@@ -4,6 +4,7 @@ using System.Linq;
 using TMPro;
 using Unity.Burst.Intrinsics;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.Rendering.UI;
@@ -61,10 +62,10 @@ public class MapGenerator : MonoBehaviour
                         Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
                         float spawnProbability = currentCell.settlementSpawnProbability;
 
-                        int r = UnityEngine.Random.Range(0, 100);
+                        float r = UnityEngine.Random.Range(0.25f, 1);
                         if (spawnProbability > r)
                         {
-                            Settlement city = Instantiate(cityPrefab, currentCell.transform.position, Quaternion.identity, currentCell.transform);
+                            Settlement city = Instantiate(cityPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
                             city.Type = SettlementType.City;
                             city.entityPrefab = entityPrefab;
                             city.map = gameObject;
@@ -75,12 +76,14 @@ public class MapGenerator : MonoBehaviour
                             cityLimit = 1;
                             townJustCompleted = true;
                             break;
-                        } else if (cityLimit == 1 || townJustCompleted)
+                        }
+                        else if (cityLimit == 1 || townJustCompleted)
                         {
                             break;
                         }
                     }
-                    if (townJustCompleted) {
+                    if (townJustCompleted)
+                    {
                         break;
                     }
                 }
@@ -98,25 +101,32 @@ public class MapGenerator : MonoBehaviour
             {
                 // This is the cell we're currently checking
                 Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
-                if (currentCell.HasSettlement()) {
+                if (currentCell.HasSettlement())
+                {
                     currentCell.settlementSpawnProbability = 0f;
-                } else {
-                    currentCell.settlementSpawnProbability = 100f;
+                }
+                else
+                {
+                    currentCell.settlementSpawnProbability = 1f;
+                    foreach (Cell cell in grid.gridArray)
+                    {
+                        if (cell == currentCell) {
+                            continue;
+                        }
+
+                        if (cell.HasSettlement())
+                        {
+                            float distanceX = Mathf.Abs(currentCell.transform.position.x - cell.transform.position.x);
+                            float distanceY = Mathf.Abs(currentCell.transform.position.y - cell.transform.position.y);
+                            float distance = Mathf.Sqrt(distanceX * distanceX + distanceY * distanceY);
+
+                            float probability = Mathf.Max(0, ((50f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f) / 100f);
+                            currentCell.settlementSpawnProbability *= probability;
+                        }
+                    }
                 }
 
-                /*
-                TextMeshProUGUI textComponent;
-                if (currentCell.debugProbability.Count == 0) {
-                    GameObject textInstance = Instantiate(textPrefab, currentCell.transform.position, Quaternion.identity, gridParent);
-                    textComponent = textInstance.GetComponent<TextMeshProUGUI>();
-                    currentCell.debugProbability.Add(textComponent);
-                } else {
-                    textComponent = currentCell.debugProbability.First();
-                }
-                textComponent.text = currentCell.settlementSpawnProbability.ToString("F2");
-                */
-
-                float clampedProbability = Mathf.Clamp01(currentCell.settlementSpawnProbability);
+                float clampedProbability = currentCell.settlementSpawnProbability * 2;
                 Color cellColor = Color.Lerp(Color.red, Color.green, clampedProbability);
                 currentCell.GetComponent<Renderer>().material.color = cellColor;
             }
