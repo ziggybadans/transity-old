@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.Burst.Intrinsics;
 using Unity.Mathematics;
@@ -57,17 +58,18 @@ public class MapGenerator : MonoBehaviour
                 {
                     for (int y = 0; y < numCellsY; y++)
                     {
-                        Vector2Int currentCell = GetCellFromPosition(new Vector2Int(x, y));
-                        float spawnProbability = spawnProbabilities[x, y];
+                        Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
+                        float spawnProbability = currentCell.settlementSpawnProbability;
 
                         int r = UnityEngine.Random.Range(0, 100);
                         if (spawnProbability > r)
                         {
-                            Settlement city = Instantiate(cityPrefab, new Vector3(currentCell.x, currentCell.y, -2f), Quaternion.identity);
+                            Settlement city = Instantiate(cityPrefab, currentCell.transform.position, Quaternion.identity, currentCell.transform);
                             city.Type = SettlementType.City;
                             city.entityPrefab = entityPrefab;
                             city.map = gameObject;
                             settlements.Add(city);
+                            currentCell.settlements.Add(city);
 
                             UpdateProbabilities();
                             cityLimit = 1;
@@ -95,35 +97,29 @@ public class MapGenerator : MonoBehaviour
             for (int y = 0; y < numCellsY; y++)
             {
                 // This is the cell we're currently checking
-                Vector2Int currentCell = GetCellFromPosition(new Vector2Int(x, y));
-
-                if (settlements.Count > 0) {
-                    foreach (Settlement settlement in settlements) {
-                        
-                    }
+                Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
+                if (currentCell.HasSettlement()) {
+                    currentCell.settlementSpawnProbability = 0f;
+                } else {
+                    currentCell.settlementSpawnProbability = 100f;
                 }
-                spawnProbabilities[x, y] = 100f;
-                GameObject textInstance = Instantiate(textPrefab, new Vector3(currentCell.x, currentCell.y, -2f), Quaternion.identity, gridParent);
-                TextMeshProUGUI textComponent = textInstance.GetComponent<TextMeshProUGUI>();
-                textComponent.text = spawnProbabilities[x, y].ToString("F2");
+
+                /*
+                TextMeshProUGUI textComponent;
+                if (currentCell.debugProbability.Count == 0) {
+                    GameObject textInstance = Instantiate(textPrefab, currentCell.transform.position, Quaternion.identity, gridParent);
+                    textComponent = textInstance.GetComponent<TextMeshProUGUI>();
+                    currentCell.debugProbability.Add(textComponent);
+                } else {
+                    textComponent = currentCell.debugProbability.First();
+                }
+                textComponent.text = currentCell.settlementSpawnProbability.ToString("F2");
+                */
+
+                float clampedProbability = Mathf.Clamp01(currentCell.settlementSpawnProbability);
+                Color cellColor = Color.Lerp(Color.red, Color.green, clampedProbability);
+                currentCell.GetComponent<Renderer>().material.color = cellColor;
             }
         }
-    }
-
-    private Vector2 GetRandomPosition()
-    {
-        int randomCellX = UnityEngine.Random.Range(0, numCellsX * 2);
-        int randomCellY = UnityEngine.Random.Range(0, numCellsY * 2);
-
-        Vector2 townPosition = GetCellFromPosition(new Vector2Int(randomCellX, randomCellY));
-        return townPosition;
-    }
-
-    private Vector2Int GetCellFromPosition(Vector2Int position)
-    {
-        int cellX = (int)(position.x * grid.gridCellSize + (grid.gridCellSize / 2f));
-        int cellY = (int)(position.y * grid.gridCellSize + (grid.gridCellSize / 2f));
-
-        return new Vector2Int(cellX, cellY);
     }
 }
