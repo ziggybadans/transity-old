@@ -441,7 +441,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minTowns: 15
   maxTowns: 30
-  numCities: 1
+  numCities: 2
   minDistance: 2
   cityPrefab: {fileID: 8973645820326527544, guid: 5c841679eb1505744a3f8d8013220fc8, type: 3}
   townPrefab: {fileID: 4089331150821525441, guid: 5abee34604d82ce4c8cf7ba2122daefa, type: 3}

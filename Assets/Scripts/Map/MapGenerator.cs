@@ -17,7 +17,7 @@ public class MapGenerator : MonoBehaviour
     [Range(10, 30)]
     public int maxTowns = 20;
     [Min(1)]
-    public int numCities = 1;
+    public int numTriesCities = 1;
     [Min(2f)]
     public int minDistance = 2;
     public Settlement cityPrefab;
@@ -47,47 +47,25 @@ public class MapGenerator : MonoBehaviour
 
     private void GenerateMap()
     {
-        // 0 = first city, 1 = other cities, 2 = no more cities
-        int cityLimit = 0;
-        bool townJustCompleted;
-        for (int i = 1; i <= numCities; i++)
+        for (int i = 1; i <= numTriesCities; i++)
         {
-            townJustCompleted = false;
-            if (cityLimit < 2)
+            int x = UnityEngine.Random.Range(0, numCellsX - 1);
+            int y = UnityEngine.Random.Range(0, numCellsY - 1);
+            Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
+            float spawnProbability = currentCell.settlementSpawnProbability;
+
+            float r = UnityEngine.Random.Range(0, 100) / 100f;
+            if (spawnProbability > r && !currentCell.HasSettlement())
             {
-                for (int x = 0; x < numCellsX; x++)
-                {
-                    for (int y = 0; y < numCellsY; y++)
-                    {
-                        Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
-                        float spawnProbability = currentCell.settlementSpawnProbability;
-
-                        float r = UnityEngine.Random.Range(0.25f, 1);
-                        if (spawnProbability > r)
-                        {
-                            Settlement city = Instantiate(cityPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
-                            city.Type = SettlementType.City;
-                            city.entityPrefab = entityPrefab;
-                            city.map = gameObject;
-                            settlements.Add(city);
-                            currentCell.settlements.Add(city);
-
-                            UpdateProbabilities();
-                            cityLimit = 1;
-                            townJustCompleted = true;
-                            break;
-                        }
-                        else if (cityLimit == 1 || townJustCompleted)
-                        {
-                            break;
-                        }
-                    }
-                    if (townJustCompleted)
-                    {
-                        break;
-                    }
-                }
+                Settlement city = Instantiate(cityPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
+                city.Type = SettlementType.City;
+                city.entityPrefab = entityPrefab;
+                city.map = gameObject;
+                settlements.Add(city);
+                currentCell.settlements.Add(city);
             }
+
+            UpdateProbabilities();
         }
     }
 
@@ -110,7 +88,8 @@ public class MapGenerator : MonoBehaviour
                     currentCell.settlementSpawnProbability = 1f;
                     foreach (Cell cell in grid.gridArray)
                     {
-                        if (cell == currentCell) {
+                        if (cell == currentCell)
+                        {
                             continue;
                         }
 
@@ -120,8 +99,15 @@ public class MapGenerator : MonoBehaviour
                             float distanceY = Mathf.Abs(currentCell.transform.position.y - cell.transform.position.y);
                             float distance = Mathf.Sqrt(distanceX * distanceX + distanceY * distanceY);
 
-                            float probability = Mathf.Max(0, ((50f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f) / 100f);
-                            currentCell.settlementSpawnProbability *= probability;
+                            float probability = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f) / 100f);
+                            if (probability > 0)
+                            {
+                                currentCell.settlementSpawnProbability *= probability / 2;
+                            }
+                            else
+                            {
+                                currentCell.settlementSpawnProbability *= probability;
+                            }
                         }
                     }
                 }
