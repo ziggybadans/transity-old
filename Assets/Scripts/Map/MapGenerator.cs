@@ -28,33 +28,84 @@ public class MapGenerator : MonoBehaviour
     public GridManager grid;
     private int numCellsX, numCellsY;
     public List<Settlement> settlements = new List<Settlement>();
+    private float[,] spawnProbabilities;
 
     private void Start()
     {
         cam = Camera.main;
 
-        numCellsX = grid.gridWidth - 1;
-        numCellsY = grid.gridHeight - 1;
+        numCellsX = grid.gridWidth;
+        numCellsY = grid.gridHeight;
 
+        spawnProbabilities = new float[numCellsX, numCellsY];
+
+        UpdateProbabilities();
         GenerateMap();
     }
 
     private void GenerateMap()
     {
-        Debug.Log(numCellsX + "," + numCellsY);
+        // 0 = first city, 1 = other cities, 2 = no more cities
+        int cityLimit = 0;
+        bool townJustCompleted;
+        for (int i = 1; i <= numCities; i++)
+        {
+            townJustCompleted = false;
+            if (cityLimit < 2)
+            {
+                for (int x = 0; x < numCellsX; x++)
+                {
+                    for (int y = 0; y < numCellsY; y++)
+                    {
+                        Vector2Int currentCell = GetCellFromPosition(new Vector2Int(x, y));
+                        float spawnProbability = spawnProbabilities[x, y];
+
+                        int r = UnityEngine.Random.Range(0, 100);
+                        if (spawnProbability > r)
+                        {
+                            Settlement city = Instantiate(cityPrefab, new Vector3(currentCell.x, currentCell.y, -2f), Quaternion.identity);
+                            city.Type = SettlementType.City;
+                            city.entityPrefab = entityPrefab;
+                            city.map = gameObject;
+                            settlements.Add(city);
+
+                            UpdateProbabilities();
+                            cityLimit = 1;
+                            townJustCompleted = true;
+                            break;
+                        } else if (cityLimit == 1 || townJustCompleted)
+                        {
+                            break;
+                        }
+                    }
+                    if (townJustCompleted) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void UpdateProbabilities()
+    {
         // Iterating through x coordinate of grid
-        for (int x = 0; x <= numCellsX; x++)
+        for (int x = 0; x < numCellsX; x++)
         {
             // Iterating through y coordinate of grid
-            for (int y = 0; y <= numCellsY; y++)
+            for (int y = 0; y < numCellsY; y++)
             {
                 // This is the cell we're currently checking
-                Vector2Int currentCell = new Vector2Int(x, y);
+                Vector2Int currentCell = GetCellFromPosition(new Vector2Int(x, y));
 
-                float spawnProbability = 100;
-                GameObject textInstance = Instantiate(textPrefab, new Vector3(GetCellFromPosition(currentCell).x, GetCellFromPosition(currentCell).y, -2f), Quaternion.identity, gridParent);
+                if (settlements.Count > 0) {
+                    foreach (Settlement settlement in settlements) {
+                        
+                    }
+                }
+                spawnProbabilities[x, y] = 100f;
+                GameObject textInstance = Instantiate(textPrefab, new Vector3(currentCell.x, currentCell.y, -2f), Quaternion.identity, gridParent);
                 TextMeshProUGUI textComponent = textInstance.GetComponent<TextMeshProUGUI>();
-                textComponent.text = spawnProbability.ToString("F2");
+                textComponent.text = spawnProbabilities[x, y].ToString("F2");
             }
         }
     }
@@ -64,15 +115,15 @@ public class MapGenerator : MonoBehaviour
         int randomCellX = UnityEngine.Random.Range(0, numCellsX * 2);
         int randomCellY = UnityEngine.Random.Range(0, numCellsY * 2);
 
-        Vector2 townPosition = GetCellFromPosition(new Vector2(randomCellX, randomCellY));
+        Vector2 townPosition = GetCellFromPosition(new Vector2Int(randomCellX, randomCellY));
         return townPosition;
     }
 
-    private Vector2 GetCellFromPosition(Vector2 position)
+    private Vector2Int GetCellFromPosition(Vector2Int position)
     {
-        float cellX = position.x * grid.gridCellSize + (grid.gridCellSize / 2f);
-        float cellY = position.y * grid.gridCellSize + (grid.gridCellSize / 2f);
+        int cellX = (int)(position.x * grid.gridCellSize + (grid.gridCellSize / 2f));
+        int cellY = (int)(position.y * grid.gridCellSize + (grid.gridCellSize / 2f));
 
-        return new Vector2(cellX, cellY);
+        return new Vector2Int(cellX, cellY);
     }
 }
