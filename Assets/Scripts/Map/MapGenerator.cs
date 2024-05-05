@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,20 +7,19 @@ using Unity.Burst.Intrinsics;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
+using UnityEditor.ShaderGraph;
 using UnityEngine;
 using UnityEngine.Rendering.UI;
 using UnityEngine.UI;
 
 public class MapGenerator : MonoBehaviour
 {
-    [Range(5, 15)]
-    public int minTowns = 10;
-    [Range(10, 30)]
-    public int maxTowns = 20;
     [Min(1)]
     public int numTriesCities = 1;
-    [Min(2f)]
-    public int minDistance = 2;
+    [Min(1)]
+    public int numTriesTowns = 3;
+    [Min(1)]
+    public int numTriesRural = 5;
     public Settlement cityPrefab;
     public Settlement townPrefab;
     public Settlement ruralPrefab;
@@ -30,7 +30,7 @@ public class MapGenerator : MonoBehaviour
     public GridManager grid;
     private int numCellsX, numCellsY;
     public List<Settlement> settlements = new List<Settlement>();
-    private float[,] spawnProbabilities;
+    public ControlHandler controlHandler;
 
     private void Start()
     {
@@ -38,8 +38,6 @@ public class MapGenerator : MonoBehaviour
 
         numCellsX = grid.gridWidth;
         numCellsY = grid.gridHeight;
-
-        spawnProbabilities = new float[numCellsX, numCellsY];
 
         UpdateProbabilities();
         GenerateMap();
@@ -52,7 +50,7 @@ public class MapGenerator : MonoBehaviour
             int x = UnityEngine.Random.Range(0, numCellsX - 1);
             int y = UnityEngine.Random.Range(0, numCellsY - 1);
             Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
-            float spawnProbability = currentCell.settlementSpawnProbability;
+            float spawnProbability = currentCell.citySpawnProbability;
 
             float r = UnityEngine.Random.Range(0, 100) / 100f;
             if (spawnProbability > r && !currentCell.HasSettlement())
@@ -62,30 +60,75 @@ public class MapGenerator : MonoBehaviour
                 city.entityPrefab = entityPrefab;
                 city.map = gameObject;
                 settlements.Add(city);
-                currentCell.settlements.Add(city);
+                currentCell.settlement = city;
+            }
+
+            UpdateProbabilities();
+        }
+
+        for (int i = 1; i <= numTriesTowns; i++)
+        {
+            int x = UnityEngine.Random.Range(0, numCellsX - 1);
+            int y = UnityEngine.Random.Range(0, numCellsY - 1);
+            Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
+            float spawnProbability = currentCell.townSpawnProbability;
+
+            float r = UnityEngine.Random.Range(0, 100) / 100f;
+            if (spawnProbability > r && !currentCell.HasSettlement())
+            {
+                Settlement town = Instantiate(townPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
+                town.Type = SettlementType.RegularTown;
+                town.entityPrefab = entityPrefab;
+                town.map = gameObject;
+                settlements.Add(town);
+                currentCell.settlement = town;
+            }
+
+            UpdateProbabilities();
+        }
+
+        for (int i = 1; i <= numTriesTowns; i++)
+        {
+            int x = UnityEngine.Random.Range(0, numCellsX - 1);
+            int y = UnityEngine.Random.Range(0, numCellsY - 1);
+            Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
+            float spawnProbability = currentCell.ruralSpawnProbability;
+
+            float r = UnityEngine.Random.Range(0, 100) / 100f;
+            if (spawnProbability > r && !currentCell.HasSettlement())
+            {
+                Settlement rural = Instantiate(ruralPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
+                rural.Type = SettlementType.RuralTown;
+                rural.entityPrefab = entityPrefab;
+                rural.map = gameObject;
+                settlements.Add(rural);
+                currentCell.settlement = rural;
             }
 
             UpdateProbabilities();
         }
     }
 
-    private void UpdateProbabilities()
+    public void UpdateProbabilities()
     {
-        // Iterating through x coordinate of grid
+        bool debugMessageSent = false;
         for (int x = 0; x < numCellsX; x++)
         {
-            // Iterating through y coordinate of grid
             for (int y = 0; y < numCellsY; y++)
             {
-                // This is the cell we're currently checking
                 Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
                 if (currentCell.HasSettlement())
                 {
-                    currentCell.settlementSpawnProbability = 0f;
+                    currentCell.citySpawnProbability = 0f;
+                    currentCell.townSpawnProbability = 0f;
+                    currentCell.ruralSpawnProbability = 0f;
                 }
                 else
                 {
-                    currentCell.settlementSpawnProbability = 1f;
+                    currentCell.citySpawnProbability = 1f;
+                    currentCell.townSpawnProbability = 1f;
+                    currentCell.ruralSpawnProbability = 1f;
+
                     foreach (Cell cell in grid.gridArray)
                     {
                         if (cell == currentCell)
@@ -97,24 +140,92 @@ public class MapGenerator : MonoBehaviour
                         {
                             float distanceX = Mathf.Abs(currentCell.transform.position.x - cell.transform.position.x);
                             float distanceY = Mathf.Abs(currentCell.transform.position.y - cell.transform.position.y);
-                            float distance = Mathf.Sqrt(distanceX * distanceX + distanceY * distanceY);
+                            float distance = Mathf.Sqrt(distanceX * distanceX + distanceY * distanceY) / grid.gridCellSize;
 
-                            float probability = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f) / 100f);
-                            if (probability > 0)
+                            if (cell.settlement.Type == SettlementType.City)
                             {
-                                currentCell.settlementSpawnProbability *= probability / 2;
+                                float cityProbability = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f) / 100f);
+
+                                if (cityProbability > 0)
+                                {
+                                    currentCell.citySpawnProbability *= cityProbability / 2;
+                                }
+                                else
+                                {
+                                    currentCell.citySpawnProbability *= cityProbability;
+                                }
+
+                                float townProbability = 25f;
+                                if (distance < 4)
+                                {
+                                    townProbability = Mathf.Pow(distance + 1, 3);
+                                }
+                                else if (distance > 4 && distance < 15)
+                                {
+                                    townProbability = -1f * Mathf.Pow((0.5f * distance) - 2, 2) + 75;
+                                }
+                                if (currentCell.townSpawnProbability < 1f)
+                                {
+                                    currentCell.townSpawnProbability = Mathf.Max(0.25f, townProbability / 100f, currentCell.townSpawnProbability);
+                                }
+                                else
+                                {
+                                    currentCell.townSpawnProbability = Mathf.Max(0.25f, townProbability / 100f);
+                                }
                             }
-                            else
+                            else if (cell.settlement.Type == SettlementType.RegularTown)
                             {
-                                currentCell.settlementSpawnProbability *= probability;
+                                if (distance <= 3)
+                                {
+                                    float townProbability = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f));
+                                    currentCell.townSpawnProbability = Mathf.Min(townProbability / 100f, currentCell.townSpawnProbability);
+                                    float cityProbability = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f) / 0.75f);
+                                    currentCell.citySpawnProbability = Mathf.Min(cityProbability / 100f, currentCell.citySpawnProbability);
+                                }
+                            }
+                            else if (cell.settlement.Type == SettlementType.RuralTown)
+                            {
+
                             }
                         }
+                        currentCell.ruralSpawnProbability = currentCell.citySpawnProbability * 2 * currentCell.townSpawnProbability;
                     }
                 }
 
-                float clampedProbability = currentCell.settlementSpawnProbability * 2;
-                Color cellColor = Color.Lerp(Color.red, Color.green, clampedProbability);
-                currentCell.GetComponent<Renderer>().material.color = cellColor;
+                float clampedProbability;
+                if (controlHandler.debugMode == 1)
+                {
+                    clampedProbability = currentCell.citySpawnProbability * 2;
+                    if (!debugMessageSent) Debug.Log("Debug mode: City Heatmap");
+                    debugMessageSent = true;
+                }
+                else if (controlHandler.debugMode == 2)
+                {
+                    clampedProbability = currentCell.townSpawnProbability;
+                    if (!debugMessageSent) Debug.Log("Debug mode: Town Heatmap");
+                    debugMessageSent = true;
+                }
+                else if (controlHandler.debugMode == 3)
+                {
+                    clampedProbability = currentCell.ruralSpawnProbability;
+                    if (!debugMessageSent) Debug.Log("Debug mode: Rural Heatmap");
+                    debugMessageSent = true;
+                }
+                else
+                {
+                    clampedProbability = 0f;
+                    if (!debugMessageSent) Debug.Log("Debug mode: Off");
+                    debugMessageSent = true;
+                }
+                if (controlHandler.debugMode > 0)
+                {
+                    Color cellColor = Color.Lerp(Color.red, Color.green, clampedProbability);
+                    currentCell.GetComponent<Renderer>().material.color = cellColor;
+                }
+                else
+                {
+                    currentCell.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 0);
+                }
             }
         }
     }

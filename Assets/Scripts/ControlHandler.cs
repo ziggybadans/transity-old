@@ -9,10 +9,12 @@ public class ControlHandler : MonoBehaviour
     public GameObject entityPrefab;
     public float lineWidth = 0.5f;
     public int numEntites = 2;
+    public int debugMode = 0;
+    public MapGenerator mapGenerator;
 
     private Camera cam;
     private int zoomLevel = 0;
-    private int zoomTimer = 0;
+    private int keyTimer = 0;
     private bool drawing;
     private GameObject currentConnectionObject;
     private LineRenderer currentConnectionObjectLr;
@@ -47,10 +49,10 @@ public class ControlHandler : MonoBehaviour
             DeleteConnection();
         }
 
-        if (zoomTimer == 2) zoomTimer = 0;
-        if (zoomTimer == 0)
+        if (keyTimer == 2) keyTimer = 0;
+        if (keyTimer == 0)
         {
-            if (Input.GetKey("="))
+            if (Input.GetKeyDown("="))
             {
                 if (zoomLevel < 2)
                 {
@@ -59,7 +61,7 @@ public class ControlHandler : MonoBehaviour
                 Debug.Log("Zoom level: " + zoomLevel);
                 StartCoroutine("timeSinceZoom");
             }
-            else if (Input.GetKey("-"))
+            else if (Input.GetKeyDown("-"))
             {
                 if (zoomLevel > 0)
                 {
@@ -69,13 +71,22 @@ public class ControlHandler : MonoBehaviour
                 StartCoroutine("timeSinceZoom");
             }
         }
+
+        if (Input.GetKeyDown("`")) {
+            if (debugMode == 3) {
+                debugMode = 0;
+            } else {
+                debugMode++;
+            }
+            mapGenerator.UpdateProbabilities();
+        }
     }
 
-    private IEnumerator timeSinceZoom()
+    private IEnumerator timeSinceKeyDown()
     {
-        while (zoomTimer <= 2)
+        while (keyTimer <= 2)
         {
-            zoomTimer++;
+            keyTimer++;
             yield return new WaitForSeconds(1f);
         }
     }

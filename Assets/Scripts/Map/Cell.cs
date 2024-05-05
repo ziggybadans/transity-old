@@ -7,20 +7,18 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    public List<Settlement> settlements = new();
+    public Settlement settlement;
     public List<TextMeshProUGUI> debugProbability = new();
-    public float settlementSpawnProbability;
+    public float citySpawnProbability, townSpawnProbability, ruralSpawnProbability;
     public float cellSize;
-    public Vector3Int centre;
 
     private void Start() {
         int x = (int)(transform.position.x * cellSize + (cellSize / 2f));
         int y = (int)(transform.position.y * cellSize + (cellSize / 2f));
-        centre = new Vector3Int(x, y);
     }
 
     public bool HasSettlement() {
-        if (settlements.Count > 0) {
+        if (settlement != null) {
             return true;
         } else {
             return false;
