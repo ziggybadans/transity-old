@@ -7,9 +7,12 @@ public class GridManager : MonoBehaviour
     public int gridWidth = 34;
     public int gridHeight = 19;
     public float gridCellSize = 2f;
-    public Cell[,] gridArray;
     public Sprite cellSprite;
+    private Cell[,] gridArray;
     private GameObject cell;
+
+    public Cell[,] GetCells() { return gridArray; }
+    
     private void Start()
     {
         gridArray = new Cell[gridWidth, gridHeight];

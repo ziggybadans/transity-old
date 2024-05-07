@@ -7,15 +7,16 @@ using UnityEngine.UI;
 public class Transport : MonoBehaviour
 {
     public bool movingForward;
-    // 0 = moving, 1 = boarding, 2 = ready to depart
     public int boarding = 0;
-    public float entitySpeed = 1f;
-    public int capacity = 6;
+    // 0 = moving, 1 = boarding, 2 = ready to depart
+    public float entitySpeed;
+    public int capacity;
     public Vector3 startPos, endPos;
     public Settlement startTown, endTown;
     private GameObject childObj;
+    private List<Passenger> passengers = new();
 
-    public List<Passenger> passengers = new();
+    public List<Passenger> GetPassengers() { return passengers; }
 
     private void Start()
     {

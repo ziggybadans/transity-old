@@ -16,13 +16,14 @@ public class Settlement : MonoBehaviour
 {
     public GameObject entityPrefab;
     public GameObject map;
+    [Min(0.1f)]
     public float spawnInterval = 3f;
-    public List<Passenger> passengers = new();
+    private List<Passenger> passengers = new();
     public SettlementType Type { get; set; }
 
     private void Start()
     {
-        //StartCoroutine(SpawnEntitiesCoroutine());
+        StartCoroutine(SpawnEntitiesCoroutine());
     }
 
     private void Update()
@@ -74,7 +75,7 @@ public class Settlement : MonoBehaviour
         Passenger newPassenger = newEntity.GetComponent<Passenger>();
         newPassenger.origin = this;
 
-        List<Settlement> settlements = map.GetComponent<MapGenerator>().settlements;
+        List<Settlement> settlements = map.GetComponent<MapGenerator>().GetSettlements();
         Settlement randomSettlement = settlements[UnityEngine.Random.Range(0, settlements.Count)];
         while (randomSettlement == newPassenger.origin)
         {

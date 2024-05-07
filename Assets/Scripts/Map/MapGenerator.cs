@@ -23,14 +23,16 @@ public class MapGenerator : MonoBehaviour
     public Settlement cityPrefab;
     public Settlement townPrefab;
     public Settlement ruralPrefab;
-    public GameObject entityPrefab;
+    public GameObject passengerEntityPrefab;
     public GameObject textPrefab;
     public Transform gridParent;
-    private Camera cam;
     public GridManager grid;
-    private int numCellsX, numCellsY;
-    public List<Settlement> settlements = new List<Settlement>();
     public ControlHandler controlHandler;
+    private Camera cam;
+    private int numCellsX, numCellsY;
+    private List<Settlement> settlements = new List<Settlement>();
+
+    public List<Settlement> GetSettlements() { return settlements; }
 
     private void Start()
     {
@@ -57,7 +59,7 @@ public class MapGenerator : MonoBehaviour
             {
                 Settlement city = Instantiate(cityPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
                 city.Type = SettlementType.City;
-                city.entityPrefab = entityPrefab;
+                city.entityPrefab = passengerEntityPrefab;
                 city.map = gameObject;
                 settlements.Add(city);
                 currentCell.settlement = city;
@@ -78,7 +80,7 @@ public class MapGenerator : MonoBehaviour
             {
                 Settlement town = Instantiate(townPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
                 town.Type = SettlementType.RegularTown;
-                town.entityPrefab = entityPrefab;
+                town.entityPrefab = passengerEntityPrefab;
                 town.map = gameObject;
                 settlements.Add(town);
                 currentCell.settlement = town;
@@ -99,7 +101,7 @@ public class MapGenerator : MonoBehaviour
             {
                 Settlement rural = Instantiate(ruralPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
                 rural.Type = SettlementType.RuralTown;
-                rural.entityPrefab = entityPrefab;
+                rural.entityPrefab = passengerEntityPrefab;
                 rural.map = gameObject;
                 settlements.Add(rural);
                 currentCell.settlement = rural;
@@ -129,7 +131,7 @@ public class MapGenerator : MonoBehaviour
                     currentCell.townSpawnProbability = 1f;
                     currentCell.ruralSpawnProbability = 1f;
 
-                    foreach (Cell cell in grid.gridArray)
+                    foreach (Cell cell in grid.GetCells())
                     {
                         if (cell == currentCell)
                         {
@@ -192,20 +194,21 @@ public class MapGenerator : MonoBehaviour
                     }
                 }
 
+                int debugMode = controlHandler.GetDebugMode();
                 float clampedProbability;
-                if (controlHandler.debugMode == 1)
+                if (debugMode == 1)
                 {
                     clampedProbability = currentCell.citySpawnProbability * 2;
                     if (!debugMessageSent) Debug.Log("Debug mode: City Heatmap");
                     debugMessageSent = true;
                 }
-                else if (controlHandler.debugMode == 2)
+                else if (debugMode == 2)
                 {
                     clampedProbability = currentCell.townSpawnProbability;
                     if (!debugMessageSent) Debug.Log("Debug mode: Town Heatmap");
                     debugMessageSent = true;
                 }
-                else if (controlHandler.debugMode == 3)
+                else if (debugMode == 3)
                 {
                     clampedProbability = currentCell.ruralSpawnProbability;
                     if (!debugMessageSent) Debug.Log("Debug mode: Rural Heatmap");
@@ -217,7 +220,7 @@ public class MapGenerator : MonoBehaviour
                     if (!debugMessageSent) Debug.Log("Debug mode: Off");
                     debugMessageSent = true;
                 }
-                if (controlHandler.debugMode > 0)
+                if (debugMode > 0)
                 {
                     Color cellColor = Color.Lerp(Color.red, Color.green, clampedProbability);
                     currentCell.GetComponent<Renderer>().material.color = cellColor;

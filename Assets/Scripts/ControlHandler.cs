@@ -5,22 +5,27 @@ using UnityEngine;
 
 public class ControlHandler : MonoBehaviour
 {
+    [Range(1, 4)]
+    public int numEntites = 2;
+    [Range(0.5f, 4)]
+    public float entitySpeed = 1;
+    [Range(1, 6)]
+    public int capacity = 6;
     public Material lineMaterial;
     public GameObject entityPrefab;
-    public float lineWidth = 0.5f;
-    public int numEntites = 2;
-    public int debugMode = 0;
     public MapGenerator mapGenerator;
 
     private Camera cam;
-    private int zoomLevel = 0;
-    private int keyTimer = 0;
+    private int debugMode = 0;
+    private float lineWidth = 0.5f;
     private bool drawing;
     private GameObject currentConnectionObject;
     private LineRenderer currentConnectionObjectLr;
     private Vector2 startPos, endPos;
     private Settlement startTown, endTown;
     private List<Connection> connections = new();
+
+    public int GetDebugMode() { return debugMode; }
 
     private void Start()
     {
@@ -49,45 +54,17 @@ public class ControlHandler : MonoBehaviour
             DeleteConnection();
         }
 
-        if (keyTimer == 2) keyTimer = 0;
-        if (keyTimer == 0)
+        if (Input.GetKeyDown("`"))
         {
-            if (Input.GetKeyDown("="))
+            if (debugMode == 3)
             {
-                if (zoomLevel < 2)
-                {
-                    zoomLevel++;
-                }
-                Debug.Log("Zoom level: " + zoomLevel);
-                StartCoroutine("timeSinceZoom");
-            }
-            else if (Input.GetKeyDown("-"))
-            {
-                if (zoomLevel > 0)
-                {
-                    zoomLevel--;
-                }
-                Debug.Log("Zoom level: " + zoomLevel);
-                StartCoroutine("timeSinceZoom");
-            }
-        }
-
-        if (Input.GetKeyDown("`")) {
-            if (debugMode == 3) {
                 debugMode = 0;
-            } else {
+            }
+            else
+            {
                 debugMode++;
             }
             mapGenerator.UpdateProbabilities();
-        }
-    }
-
-    private IEnumerator timeSinceKeyDown()
-    {
-        while (keyTimer <= 2)
-        {
-            keyTimer++;
-            yield return new WaitForSeconds(1f);
         }
     }
 
@@ -144,7 +121,7 @@ public class ControlHandler : MonoBehaviour
                 currentConnectionObjectLr.SetPosition(1, endPos);
 
                 Connection currentConnection = currentConnectionObject.AddComponent<Connection>();
-                currentConnection.SetupConnection(startPos, endPos, startTown, endTown, numEntites, entityPrefab);
+                currentConnection.SetupConnection(startPos, endPos, startTown, endTown, numEntites, entityPrefab, entitySpeed, capacity);
                 currentConnectionObject.tag = "Connection";
 
                 SetupConnectionVisuals(currentConnectionObjectLr, startPos, endPos);

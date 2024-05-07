@@ -9,8 +9,10 @@ public class Connection : MonoBehaviour
     private int numEntites;
     private List<GameObject> entities = new();
     private GameObject entityPrefab;
+    private float entitySpeed;
+    private int capacity;
 
-    public void SetupConnection(Vector2 startPos, Vector2 endPos, Settlement startTown, Settlement endTown, int numEntites, GameObject entityPrefab)
+    public void SetupConnection(Vector2 startPos, Vector2 endPos, Settlement startTown, Settlement endTown, int numEntites, GameObject entityPrefab, float entitySpeed, int capacity)
     {
         this.startPos = startPos;
         this.endPos = endPos;
@@ -18,8 +20,10 @@ public class Connection : MonoBehaviour
         this.endTown = endTown;
         this.numEntites = numEntites;
         this.entityPrefab = entityPrefab;
+        this.entitySpeed = entitySpeed;
+        this.capacity = capacity;
 
-        StartCoroutine(SpawnEntitiesCoroutine(startPos, endPos));
+        StartCoroutine(SpawnEntitiesCoroutine(this.startPos, this.endPos));
     }
 
     private IEnumerator SpawnEntitiesCoroutine(Vector3 startPos, Vector3 endPos)
@@ -40,6 +44,8 @@ public class Connection : MonoBehaviour
             entity.GetComponent<Transport>().endPos = endPos;
             entity.GetComponent<Transport>().startTown = startTown;
             entity.GetComponent<Transport>().endTown = endTown;
+            entity.GetComponent<Transport>().entitySpeed = entitySpeed;
+            entity.GetComponent<Transport>().capacity = capacity;
 
             yield return new WaitForSeconds(0.1f);
         }

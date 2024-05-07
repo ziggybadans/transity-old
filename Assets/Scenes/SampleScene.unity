@@ -439,10 +439,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfe1af9fdc1fdb041ad6da4a4ea7feb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minTowns: 15
-  maxTowns: 30
-  numCities: 2
-  minDistance: 2
+  numTriesCities: 1
+  numTriesTowns: 5
+  numTriesRural: 5
   cityPrefab: {fileID: 8973645820326527544, guid: 5c841679eb1505744a3f8d8013220fc8, type: 3}
   townPrefab: {fileID: 4089331150821525441, guid: 5abee34604d82ce4c8cf7ba2122daefa, type: 3}
   ruralPrefab: {fileID: 6145121332242928149, guid: e91d107291d31184aa1dfb76d01f3d1a, type: 3}
@@ -451,6 +450,7 @@ MonoBehaviour:
   gridParent: {fileID: 2147010513}
   grid: {fileID: 1672888330}
   settlements: []
+  controlHandler: {fileID: 1789311886}
 --- !u!4 &781129548
 Transform:
   m_ObjectHideFlags: 0
@@ -547,6 +547,9 @@ MonoBehaviour:
   entityPrefab: {fileID: 6838855262692231112, guid: 1b0be76dfee1fde4f93965139bf55b6d, type: 3}
   lineWidth: 0.5
   numEntites: 1
+  debugMode: 0
+  mapGenerator: {fileID: 781129547}
+  entitySpeed: 4
 --- !u!4 &1789311887
 Transform:
   m_ObjectHideFlags: 0
