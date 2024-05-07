@@ -61,7 +61,7 @@ public class Settlement : MonoBehaviour
             }
             else
             {
-                passengers[i].gameObject.transform.position = passengers[i - 1].transform.position + (Vector3.left * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * 1.3f);
+                passengers[i].gameObject.transform.position = passengers[i - 1].transform.position + (1.3f * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * Vector3.left);
                 if (i == 5)
                 {
                     passengers[i].gameObject.transform.position = new Vector2(transform.position.x, transform.position.y) + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.down * 0.1f);

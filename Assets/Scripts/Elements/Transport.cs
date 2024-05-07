@@ -83,11 +83,10 @@ public class Transport : MonoBehaviour
         {
             int row = i / 2;
             int column = i % 2;
-            Vector3 passengerPosition = new Vector3(column * 0.2f, -row * 0.2f, 0f);
+            Vector3 passengerPosition = new(column * 0.2f, -row * 0.2f, 0f);
 
             passengers[i].transform.SetParent(childObj.transform, false);
-            passengers[i].transform.localPosition = passengerPosition;
-            passengers[i].transform.localRotation = Quaternion.identity;
+            passengers[i].transform.SetLocalPositionAndRotation(passengerPosition, Quaternion.identity);
         }
     }
 
@@ -95,8 +94,7 @@ public class Transport : MonoBehaviour
     {
         Vector3 direction = targetPos - transform.position;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-        transform.rotation = Quaternion.Euler(0f, 0f, angle);
-        transform.position = Vector3.MoveTowards(transform.position, targetPos, entitySpeed * Time.deltaTime);
+        transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, targetPos, entitySpeed * Time.deltaTime), Quaternion.Euler(0f, 0f, angle));
     }
 
     private IEnumerator BoardAndAlight(Settlement settlement)

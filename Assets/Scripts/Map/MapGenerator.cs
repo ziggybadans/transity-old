@@ -1,16 +1,5 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using TMPro;
-using Unity.Burst.Intrinsics;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using Unity.VisualScripting.FullSerializer;
-using UnityEditor.ShaderGraph;
 using UnityEngine;
-using UnityEngine.Rendering.UI;
-using UnityEngine.UI;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -30,7 +19,7 @@ public class MapGenerator : MonoBehaviour
     public ControlHandler controlHandler;
     private Camera cam;
     private int numCellsX, numCellsY;
-    private List<Settlement> settlements = new List<Settlement>();
+    private List<Settlement> settlements = new();
 
     public List<Settlement> GetSettlements() { return settlements; }
 
@@ -179,7 +168,7 @@ public class MapGenerator : MonoBehaviour
                             {
                                 if (distance <= 3)
                                 {
-                                    float townProbability = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f));
+                                    float townProbability = Mathf.Max(0, (100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f);
                                     currentCell.townSpawnProbability = Mathf.Min(townProbability / 100f, currentCell.townSpawnProbability);
                                     float cityProbability = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f) / 0.75f);
                                     currentCell.citySpawnProbability = Mathf.Min(cityProbability / 100f, currentCell.citySpawnProbability);

@@ -8,7 +8,6 @@ using UnityEngine;
 public class Cell : MonoBehaviour
 {
     public Settlement settlement;
-    public List<TextMeshProUGUI> debugProbability = new();
     public float citySpawnProbability, townSpawnProbability, ruralSpawnProbability;
     public float cellSize;
 

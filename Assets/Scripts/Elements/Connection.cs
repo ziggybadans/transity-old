@@ -34,12 +34,12 @@ public class Connection : MonoBehaviour
 
         for (int i = 1; i <= numEntites; i++)
         {
-            Vector3 spawnPos = startPos + (direction * spacing * i);
+            Vector3 spawnPos = startPos + (i * spacing * direction);
             spawnPos.z = -2f;
             GameObject entity = Instantiate(entityPrefab, spawnPos, Quaternion.identity);
             entities.Add(entity);
             
-            entity.GetComponent<Transport>().movingForward = (i % 2 != 0);
+            entity.GetComponent<Transport>().movingForward = i % 2 != 0;
             entity.GetComponent<Transport>().startPos = startPos;
             entity.GetComponent<Transport>().endPos = endPos;
             entity.GetComponent<Transport>().startTown = startTown;

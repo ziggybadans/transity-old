@@ -83,7 +83,7 @@ public class ControlHandler : MonoBehaviour
         ConfigureLineRenderer(lr, startPos, endPos);
 
         MeshCollider connectionMesh = currentConnectionObject.AddComponent<MeshCollider>();
-        Mesh mesh = new Mesh();
+        Mesh mesh = new();
         lr.BakeMesh(mesh, cam, true);
         connectionMesh.sharedMesh = mesh;
     }
