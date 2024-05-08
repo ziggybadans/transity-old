@@ -445,11 +445,10 @@ MonoBehaviour:
   cityPrefab: {fileID: 8973645820326527544, guid: 5c841679eb1505744a3f8d8013220fc8, type: 3}
   townPrefab: {fileID: 4089331150821525441, guid: 5abee34604d82ce4c8cf7ba2122daefa, type: 3}
   ruralPrefab: {fileID: 6145121332242928149, guid: e91d107291d31184aa1dfb76d01f3d1a, type: 3}
-  entityPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
+  passengerEntityPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
   textPrefab: {fileID: 2333067529079232155, guid: bf1427a9fb80bf142ae3f2090286de02, type: 3}
   gridParent: {fileID: 2147010513}
   grid: {fileID: 1672888330}
-  settlements: []
   controlHandler: {fileID: 1789311886}
 --- !u!4 &781129548
 Transform:
@@ -543,13 +542,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34e7bd701bd3590459e30369d6b604e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  numEntites: 1
+  entitySpeed: 4
+  capacity: 6
   lineMaterial: {fileID: 2100000, guid: c660081b4df3c914da0ba0fd2510d41d, type: 2}
   entityPrefab: {fileID: 6838855262692231112, guid: 1b0be76dfee1fde4f93965139bf55b6d, type: 3}
-  lineWidth: 0.5
-  numEntites: 1
-  debugMode: 0
   mapGenerator: {fileID: 781129547}
-  entitySpeed: 4
 --- !u!4 &1789311887
 Transform:
   m_ObjectHideFlags: 0
