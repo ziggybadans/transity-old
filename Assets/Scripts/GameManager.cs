@@ -5,19 +5,24 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager instance;
+    [SerializeReference]
+    private static GameManager instance;
 
-    private void Awake() {
-        if (instance == null) {
+    private void Awake()
+    {
+        if (instance == null)
+        {
             instance = this;
             DontDestroyOnLoad(gameObject);
-        } else {
+        }
+        else
+        {
             Destroy(gameObject);
         }
     }
 
-    public void LoadGameplayScene(string sceneName)
+    private void LoadGameplayScene(string sceneName)
     {
-       SceneManager.LoadScene(sceneName);
+        SceneManager.LoadScene(sceneName);
     }
 }

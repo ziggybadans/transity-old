@@ -10,7 +10,7 @@ public class SettingsManager : MonoBehaviour
 {
     public static SettingsManager Instance { get; private set; }
 
-    public Dictionary<SettingsTypes, float> mapGenValues = new();
+    private Dictionary<SettingsTypes, float> mapGenValues = new();
 
     private void Awake() {
         if (Instance == null) {

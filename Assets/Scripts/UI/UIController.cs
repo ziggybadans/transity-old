@@ -21,8 +21,10 @@ public class UIController : MonoBehaviour
         }
     }
 
-    public List<UIBlock2D> views = new();
-    public UIBlock2D mainMenu;
+    [SerializeField]
+    private List<UIBlock2D> views = new();
+    [SerializeField]
+    private UIBlock2D mainMenu;
 
     private void Start()
     {
@@ -36,7 +38,7 @@ public class UIController : MonoBehaviour
         }
     }
 
-    public void SwitchView(UIBlock2D newView)
+    private void SwitchView(UIBlock2D newView)
     {
         foreach (UIBlock2D view in views)
         {

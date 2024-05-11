@@ -12,13 +12,14 @@ public class SettingsMenu : MonoBehaviour
     private UIBlock Root = null;
 
     [System.Serializable]
-    public class SliderSettings
+    private class SliderSettings
     {
         public FloatSetting Setting = new();
         public ItemView SliderItemView = null;
     }
 
-    public List<SliderSettings> sliders = new();
+    [SerializeField]
+    private List<SliderSettings> sliders = new();
 
     private void Start()
     {
@@ -32,7 +33,7 @@ public class SettingsMenu : MonoBehaviour
         }
     }
 
-    public void SaveSettings() {
+    private void SaveSettings() {
         foreach (var settings in sliders) {
             SettingsManager.Instance.SetMapGenValue(settings.Setting.settingType, settings.Setting.Value);
         }
