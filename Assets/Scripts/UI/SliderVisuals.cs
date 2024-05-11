@@ -6,8 +6,8 @@ using UnityEngine;
 [System.Serializable]
 public class SliderVisuals : ItemVisuals
 {
-    public TextBlock Label = null;
-    public UIBlock2D SliderBackground = null;
-    public UIBlock2D FillBar = null;
-    public TextBlock ValueLabel = null;
+    public TextBlock label = null;
+    public UIBlock2D sliderBG = null;
+    public UIBlock2D fillBar = null;
+    public TextBlock valueLabel = null;
 }

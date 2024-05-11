@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum SettingsTypes {
-    numCities, numTowns, numRurals
+    NumCities, NumTowns, NumRurals
 }
 
 public class SettingsManager : MonoBehaviour
 {
-    public static SettingsManager Instance { get; private set; }
+    public static SettingsManager SettingsInstance { get; private set; }
 
-    private Dictionary<SettingsTypes, float> mapGenValues = new();
+    private Dictionary<SettingsTypes, int> _mapGenValues = new();
 
     private void Awake() {
-        if (Instance == null) {
-            Instance = this;
+        if (SettingsInstance == null) {
+            SettingsInstance = this;
             DontDestroyOnLoad(gameObject);
         } else {
             Destroy(gameObject);
@@ -22,18 +22,18 @@ public class SettingsManager : MonoBehaviour
     }
 
     private void Start() {
-        mapGenValues.Add(SettingsTypes.numCities, 0);
-        mapGenValues.Add(SettingsTypes.numTowns, 0);
-        mapGenValues.Add(SettingsTypes.numRurals, 0);
+        _mapGenValues.Add(SettingsTypes.NumCities, 0);
+        _mapGenValues.Add(SettingsTypes.NumTowns, 0);
+        _mapGenValues.Add(SettingsTypes.NumRurals, 0);
     }
 
     public void SetMapGenValue(SettingsTypes settingName, float settingValue) {
-        mapGenValues[settingName] = settingValue;
+        _mapGenValues[settingName] = (int)settingValue;
         Debug.Log("Updated setting " + settingName.ToString() + " to " + settingValue);
     }
 
-    public float GetMapGenValue(SettingsTypes settingName) {
-        if (mapGenValues.TryGetValue(settingName, out float value)) {
+    public int GetMapGenValue(SettingsTypes settingName) {
+        if (_mapGenValues.TryGetValue(settingName, out int value)) {
             return value;
         } else {
             return 0;

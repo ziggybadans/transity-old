@@ -6,13 +6,13 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [SerializeReference]
-    private static GameManager instance;
+    public static GameManager GameInstance;
 
     private void Awake()
     {
-        if (instance == null)
+        if (GameInstance == null)
         {
-            instance = this;
+            GameInstance = this;
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -21,8 +21,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void LoadGameplayScene(string sceneName)
+    private void GenerateMap(string sceneName)
     {
-        SceneManager.LoadScene(sceneName);
+        SceneManager.LoadScene("Game");
     }
 }

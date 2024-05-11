@@ -9,60 +9,60 @@ using UnityEngine.UIElements;
 public class SettingsMenu : MonoBehaviour
 {
     [SerializeReference]
-    private UIBlock Root = null;
+    private UIBlock _rootUI = null;
 
     [System.Serializable]
     private class SliderSettings
     {
-        public FloatSetting Setting = new();
-        public ItemView SliderItemView = null;
+        public FloatSetting _sliderSetting = new();
+        public ItemView _sliderItem = null;
     }
 
     [SerializeField]
-    private List<SliderSettings> sliders = new();
+    private List<SliderSettings> _sliders = new();
 
     private void Start()
     {
         // State changing
-        Root.AddGestureHandler<Gesture.OnDrag, SliderVisuals>(HandleSliderDragged);
+        _rootUI.AddGestureHandler<Gesture.OnDrag, SliderVisuals>(HandleSliderDragged);
 
-        foreach (var settings in sliders)
+        foreach (var settings in _sliders)
         {
             // Temporary
-            BindSlider(settings.Setting, settings.SliderItemView.Visuals as SliderVisuals);
+            BindSlider(settings._sliderSetting, settings._sliderItem.Visuals as SliderVisuals);
         }
     }
 
     private void SaveSettings() {
-        foreach (var settings in sliders) {
-            SettingsManager.Instance.SetMapGenValue(settings.Setting.settingType, settings.Setting.Value);
+        foreach (var settings in _sliders) {
+            SettingsManager.SettingsInstance.SetMapGenValue(settings._sliderSetting.settingType, settings._sliderSetting.Value);
         }
     }
 
     private void HandleSliderDragged(Gesture.OnDrag evt, SliderVisuals target)
     {
-        SliderSettings settings = sliders.Find(s => s.SliderItemView.Visuals == target);
+        SliderSettings settings = _sliders.Find(s => s._sliderItem.Visuals == target);
         if (settings != null)
         {
             Vector3 currentPointerPos = evt.PointerPositions.Current;
 
-            float localXPos = target.SliderBackground.transform.InverseTransformPoint(currentPointerPos).x;
-            float sliderWidth = target.SliderBackground.CalculatedSize.X.Value;
+            float localXPos = target.sliderBG.transform.InverseTransformPoint(currentPointerPos).x;
+            float sliderWidth = target.sliderBG.CalculatedSize.X.Value;
 
             float distanceFromLeft = localXPos + .5f * sliderWidth;
             float percentFromLeft = Mathf.Clamp01(distanceFromLeft / sliderWidth);
 
-            settings.Setting.Value = settings.Setting.Min + percentFromLeft * (settings.Setting.Max - settings.Setting.Min);
+            settings._sliderSetting.Value = settings._sliderSetting.min + percentFromLeft * (settings._sliderSetting.max - settings._sliderSetting.min);
 
-            target.FillBar.Size.X.Percent = percentFromLeft;
-            target.ValueLabel.Text = settings.Setting.DisplayValue;
+            target.fillBar.Size.X.Percent = percentFromLeft;
+            target.valueLabel.Text = settings._sliderSetting.DisplayValue;
         }
     }
 
     private void BindSlider(FloatSetting floatSetting, SliderVisuals visuals)
     {
-        visuals.Label.Text = floatSetting.Name;
-        visuals.ValueLabel.Text = floatSetting.DisplayValue;
-        visuals.FillBar.Size.X.Percent = (floatSetting.Value - floatSetting.Min) / (floatSetting.Max - floatSetting.Min);
+        visuals.label.Text = floatSetting.name;
+        visuals.valueLabel.Text = floatSetting.DisplayValue;
+        visuals.fillBar.Size.X.Percent = (floatSetting.Value - floatSetting.min) / (floatSetting.max - floatSetting.min);
     }
 }

@@ -4,54 +4,54 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
-    public int gridWidth = 34;
-    public int gridHeight = 19;
-    public float gridCellSize = 2f;
-    public Sprite cellSprite;
-    private Cell[,] gridArray;
-    private GameObject cell;
+    public int GRID_WIDTH = 34;
+    public int GRID_HEIGHT = 19;
+    public float GRID_CELL_SIZE = 2f;
+    public static Sprite s_cellSprite;
+    private Cell[,] _gridArray;
+    private GameObject _cell;
 
-    public Cell[,] GetCells() { return gridArray; }
+    public Cell[,] GetCells() { return _gridArray; }
     
     private void Start()
     {
-        gridArray = new Cell[gridWidth, gridHeight];
+        _gridArray = new Cell[GRID_WIDTH, GRID_HEIGHT];
 
-        for (int x = 0; x < gridWidth; x++)
+        for (int x = 0; x < GRID_WIDTH; x++)
         {
-            for (int y = 0; y < gridHeight; y++)
+            for (int y = 0; y < GRID_HEIGHT; y++)
             {
                 Debug.DrawLine(GetBorderFromPosition(x, y), GetBorderFromPosition(x, y + 1), Color.gray, 1000f);
                 Debug.DrawLine(GetBorderFromPosition(x, y), GetBorderFromPosition(x + 1, y), Color.gray, 1000f);
                 
-                cell = new GameObject("Cell");
-                cell.AddComponent<Cell>();
-                cell.AddComponent<SpriteRenderer>().sprite = cellSprite;
-                cell.transform.parent = transform;
-                cell.transform.position = GetPositionForCell(x, y);
-                cell.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
-                cell.GetComponent<Cell>().cellSize = gridCellSize;
-                gridArray[x, y] = cell.GetComponent<Cell>();
+                _cell = new GameObject("Cell");
+                _cell.AddComponent<Cell>();
+                _cell.AddComponent<SpriteRenderer>().sprite = s_cellSprite;
+                _cell.transform.parent = transform;
+                _cell.transform.position = GetPositionForCell(x, y);
+                _cell.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+                _cell.GetComponent<Cell>().cellSize = GRID_CELL_SIZE;
+                _gridArray[x, y] = _cell.GetComponent<Cell>();
             }
         }
-        Debug.DrawLine(GetBorderFromPosition(0, gridHeight), GetBorderFromPosition(gridWidth, gridHeight), Color.gray, 1000f);
-        Debug.DrawLine(GetBorderFromPosition(gridWidth, 0), GetBorderFromPosition(gridWidth, gridHeight), Color.gray, 1000f);
+        Debug.DrawLine(GetBorderFromPosition(0, GRID_HEIGHT), GetBorderFromPosition(GRID_WIDTH, GRID_HEIGHT), Color.gray, 1000f);
+        Debug.DrawLine(GetBorderFromPosition(GRID_WIDTH, 0), GetBorderFromPosition(GRID_WIDTH, GRID_HEIGHT), Color.gray, 1000f);
     }
 
     private Vector3 GetBorderFromPosition(int x, int y)
     {
-        return new Vector3(x, y) * gridCellSize;
+        return new Vector3(x, y) * GRID_CELL_SIZE;
     }
 
     private Vector3 GetPositionForCell(int x, int y)
     {
-        int cellX = (int)(x * gridCellSize + (gridCellSize / 2f));
-        int cellY = (int)(y * gridCellSize + (gridCellSize / 2f));
+        int cellX = (int)(x * GRID_CELL_SIZE + (GRID_CELL_SIZE / 2f));
+        int cellY = (int)(y * GRID_CELL_SIZE + (GRID_CELL_SIZE / 2f));
 
         return new Vector3(cellX, cellY, -5f);
     }
 
     public Cell GetCellFromPosition(Vector2Int pos) {
-        return gridArray[pos.x, pos.y];
+        return _gridArray[pos.x, pos.y];
     }
 }

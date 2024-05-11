@@ -6,13 +6,13 @@ using UnityEngine;
 public class UIController : MonoBehaviour
 {
     [SerializeReference]
-    private static UIController instance;
+    public static UIController UIInstance;
 
     private void Awake()
     {
-        if (instance == null)
+        if (UIInstance == null)
         {
-            instance = this;
+            UIInstance = this;
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -22,15 +22,15 @@ public class UIController : MonoBehaviour
     }
 
     [SerializeField]
-    private List<UIBlock2D> views = new();
+    private List<UIBlock2D> _views = new();
     [SerializeField]
-    private UIBlock2D mainMenu;
+    private UIBlock2D _mainMenu;
 
     private void Start()
     {
-        foreach (UIBlock2D view in views)
+        foreach (UIBlock2D view in _views)
         {
-            if (view != mainMenu) {
+            if (view != _mainMenu) {
                 view.gameObject.SetActive(false);
             } else {
                 view.gameObject.SetActive(true);
@@ -40,7 +40,7 @@ public class UIController : MonoBehaviour
 
     private void SwitchView(UIBlock2D newView)
     {
-        foreach (UIBlock2D view in views)
+        foreach (UIBlock2D view in _views)
         {
             view.gameObject.SetActive(false);
         }

@@ -3,32 +3,24 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
-    [Min(1)]
-    public int numTriesCities = 1;
-    [Min(1)]
-    public int numTriesTowns = 3;
-    [Min(1)]
-    public int numTriesRural = 5;
-    public Settlement cityPrefab;
-    public Settlement townPrefab;
-    public Settlement ruralPrefab;
-    public GameObject passengerEntityPrefab;
-    public GameObject textPrefab;
-    public Transform gridParent;
-    public GridManager grid;
-    public ControlHandler controlHandler;
-    private Camera cam;
-    private int numCellsX, numCellsY;
-    private List<Settlement> settlements = new();
+    private int _numTriesCities, _numTriesTowns, _numTriesRural;
+    private Settlement _cityPrefab, _townPrefab, _ruralPrefab;
+    private GameObject _passengerEntityPrefab;
+    private GridManager _grid;
+    private static ControlHandler s_controlHandler;
+    private int _numCellsX, _numCellsY;
+    private List<Settlement> _settlements = new();
 
-    public List<Settlement> GetSettlements() { return settlements; }
+    public List<Settlement> GetSettlements() { return _settlements; }
 
     private void Start()
     {
-        cam = Camera.main;
+        _numTriesCities = SettingsManager.SettingsInstance.GetMapGenValue(SettingsTypes.NumCities);
+        _numTriesTowns = SettingsManager.SettingsInstance.GetMapGenValue(SettingsTypes.NumTowns);
+        _numTriesRural = SettingsManager.SettingsInstance.GetMapGenValue(SettingsTypes.NumRurals);
 
-        numCellsX = grid.gridWidth;
-        numCellsY = grid.gridHeight;
+        _numCellsX = _grid.GRID_WIDTH;
+        _numCellsY = _grid.GRID_HEIGHT;
 
         UpdateProbabilities();
         GenerateMap();
@@ -36,63 +28,63 @@ public class MapGenerator : MonoBehaviour
 
     private void GenerateMap()
     {
-        for (int i = 1; i <= numTriesCities; i++)
+        for (int i = 1; i <= _numTriesCities; i++)
         {
-            int x = UnityEngine.Random.Range(0, numCellsX - 1);
-            int y = UnityEngine.Random.Range(0, numCellsY - 1);
-            Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
+            int x = UnityEngine.Random.Range(0, _numCellsX - 1);
+            int y = UnityEngine.Random.Range(0, _numCellsY - 1);
+            Cell currentCell = _grid.GetCellFromPosition(new Vector2Int(x, y));
             float spawnProbability = currentCell.citySpawnProbability;
 
             float r = UnityEngine.Random.Range(0, 100) / 100f;
             if (spawnProbability > r && !currentCell.HasSettlement())
             {
-                Settlement city = Instantiate(cityPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
+                Settlement city = Instantiate(_cityPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
                 city.Type = SettlementType.City;
-                city.entityPrefab = passengerEntityPrefab;
+                city.entityPrefab = _passengerEntityPrefab;
                 city.map = gameObject;
-                settlements.Add(city);
+                _settlements.Add(city);
                 currentCell.settlement = city;
             }
 
             UpdateProbabilities();
         }
 
-        for (int i = 1; i <= numTriesTowns; i++)
+        for (int i = 1; i <= _numTriesTowns; i++)
         {
-            int x = UnityEngine.Random.Range(0, numCellsX - 1);
-            int y = UnityEngine.Random.Range(0, numCellsY - 1);
-            Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
+            int x = UnityEngine.Random.Range(0, _numCellsX - 1);
+            int y = UnityEngine.Random.Range(0, _numCellsY - 1);
+            Cell currentCell = _grid.GetCellFromPosition(new Vector2Int(x, y));
             float spawnProbability = currentCell.townSpawnProbability;
 
             float r = UnityEngine.Random.Range(0, 100) / 100f;
             if (spawnProbability > r && !currentCell.HasSettlement())
             {
-                Settlement town = Instantiate(townPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
+                Settlement town = Instantiate(_townPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
                 town.Type = SettlementType.RegularTown;
-                town.entityPrefab = passengerEntityPrefab;
+                town.entityPrefab = _passengerEntityPrefab;
                 town.map = gameObject;
-                settlements.Add(town);
+                _settlements.Add(town);
                 currentCell.settlement = town;
             }
 
             UpdateProbabilities();
         }
 
-        for (int i = 1; i <= numTriesTowns; i++)
+        for (int i = 1; i <= _numTriesTowns; i++)
         {
-            int x = UnityEngine.Random.Range(0, numCellsX - 1);
-            int y = UnityEngine.Random.Range(0, numCellsY - 1);
-            Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
+            int x = UnityEngine.Random.Range(0, _numCellsX - 1);
+            int y = UnityEngine.Random.Range(0, _numCellsY - 1);
+            Cell currentCell = _grid.GetCellFromPosition(new Vector2Int(x, y));
             float spawnProbability = currentCell.ruralSpawnProbability;
 
             float r = UnityEngine.Random.Range(0, 100) / 100f;
             if (spawnProbability > r && !currentCell.HasSettlement())
             {
-                Settlement rural = Instantiate(ruralPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
+                Settlement rural = Instantiate(_ruralPrefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
                 rural.Type = SettlementType.RuralTown;
-                rural.entityPrefab = passengerEntityPrefab;
+                rural.entityPrefab = _passengerEntityPrefab;
                 rural.map = gameObject;
-                settlements.Add(rural);
+                _settlements.Add(rural);
                 currentCell.settlement = rural;
             }
 
@@ -103,11 +95,11 @@ public class MapGenerator : MonoBehaviour
     public void UpdateProbabilities()
     {
         bool debugMessageSent = false;
-        for (int x = 0; x < numCellsX; x++)
+        for (int x = 0; x < _numCellsX; x++)
         {
-            for (int y = 0; y < numCellsY; y++)
+            for (int y = 0; y < _numCellsY; y++)
             {
-                Cell currentCell = grid.GetCellFromPosition(new Vector2Int(x, y));
+                Cell currentCell = _grid.GetCellFromPosition(new Vector2Int(x, y));
                 if (currentCell.HasSettlement())
                 {
                     currentCell.citySpawnProbability = 0f;
@@ -120,7 +112,7 @@ public class MapGenerator : MonoBehaviour
                     currentCell.townSpawnProbability = 1f;
                     currentCell.ruralSpawnProbability = 1f;
 
-                    foreach (Cell cell in grid.GetCells())
+                    foreach (Cell cell in _grid.GetCells())
                     {
                         if (cell == currentCell)
                         {
@@ -131,7 +123,7 @@ public class MapGenerator : MonoBehaviour
                         {
                             float distanceX = Mathf.Abs(currentCell.transform.position.x - cell.transform.position.x);
                             float distanceY = Mathf.Abs(currentCell.transform.position.y - cell.transform.position.y);
-                            float distance = Mathf.Sqrt(distanceX * distanceX + distanceY * distanceY) / grid.gridCellSize;
+                            float distance = Mathf.Sqrt(distanceX * distanceX + distanceY * distanceY) / _grid.GRID_CELL_SIZE;
 
                             if (cell.settlement.Type == SettlementType.City)
                             {
@@ -183,7 +175,7 @@ public class MapGenerator : MonoBehaviour
                     }
                 }
 
-                int debugMode = controlHandler.GetDebugMode();
+                int debugMode = s_controlHandler.GetDebugMode();
                 float clampedProbability;
                 if (debugMode == 1)
                 {
