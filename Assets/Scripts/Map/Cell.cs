@@ -23,4 +23,10 @@ public class Cell : MonoBehaviour
             return false;
         }
     }
+
+    public void SetAllProbabilities (float value) {
+        citySpawnProbability = value;
+        townSpawnProbability = value;
+        ruralSpawnProbability = value;
+    }
 }

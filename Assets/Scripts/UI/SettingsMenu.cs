@@ -33,7 +33,7 @@ public class SettingsMenu : MonoBehaviour
         }
     }
 
-    private void SaveSettings() {
+    public void SaveSettings() {
         foreach (var settings in _sliders) {
             SettingsManager.SettingsInstance.SetMapGenValue(settings._sliderSetting.settingType, settings._sliderSetting.Value);
         }

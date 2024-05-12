@@ -4105,32 +4105,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12a71df7a95a88d4c877e45d70ea3aae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Root: {fileID: 707142326}
-  sliders:
-  - Setting:
-      Name: Cities
+  _rootUI: {fileID: 707142326}
+  _sliders:
+  - _sliderSetting:
+      name: Cities
       value: 3
-      Min: 0
-      Max: 25
-      ValueFormat: '{0:0}'
+      min: 0
+      max: 25
+      valueFormat: '{0:0}'
       settingType: 0
-    SliderItemView: {fileID: 1645079200}
-  - Setting:
-      Name: Towns
+    _sliderItem: {fileID: 1645079200}
+  - _sliderSetting:
+      name: Towns
       value: 5
-      Min: 0
-      Max: 50
-      ValueFormat: '{0:0}'
+      min: 0
+      max: 50
+      valueFormat: '{0:0}'
       settingType: 1
-    SliderItemView: {fileID: 1997886438}
-  - Setting:
-      Name: Rural Localities
+    _sliderItem: {fileID: 1997886438}
+  - _sliderSetting:
+      name: Rural Localities
       value: 7
-      Min: 0
-      Max: 100
-      ValueFormat: '{0:0}'
+      min: 0
+      max: 100
+      valueFormat: '{0:0}'
       settingType: 2
-    SliderItemView: {fileID: 2111314126}
+    _sliderItem: {fileID: 2111314126}
 --- !u!114 &707142326
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4419,10 +4419,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01997e4495a74054c94d316cb415cedc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  views:
+  _views:
   - {fileID: 1313523535}
   - {fileID: 707142326}
-  mainMenu: {fileID: 1313523535}
+  _mainMenu: {fileID: 1313523535}
 --- !u!4 &885494839
 Transform:
   m_ObjectHideFlags: 0
@@ -5472,6 +5472,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6284e5accdeb99748b9af14765365f1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  state: 0
 --- !u!4 &1054237567
 Transform:
   m_ObjectHideFlags: 0
@@ -7896,7 +7897,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
       propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
       propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -7920,7 +7921,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
       propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: LoadGameplayScene
+      value: UpdateGameStateMapGen
       objectReference: {fileID: 0}
     - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
       propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -7932,7 +7933,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
       propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_StringArgument
-      value: Game
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
       propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -8601,10 +8602,10 @@ MonoBehaviour:
     - rid: 2551363025413341420
       type: {class: SliderVisuals, ns: , asm: Assembly-CSharp}
       data:
-        Label: {fileID: 1309958538}
-        SliderBackground: {fileID: 1193917980}
-        FillBar: {fileID: 2055915518}
-        ValueLabel: {fileID: 269188957}
+        label: {fileID: 1309958538}
+        sliderBG: {fileID: 1193917980}
+        fillBar: {fileID: 2055915518}
+        valueLabel: {fileID: 269188957}
 --- !u!114 &1645079201
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10005,6 +10006,34 @@ PrefabInstance:
       propertyPath: visuals.Shadow.Width.Raw
       value: 10.74
       objectReference: {fileID: 0}
+    - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
+      propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
+      propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
+      propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1054237566}
+    - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
+      propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
+      propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Quit
+      objectReference: {fileID: 0}
+    - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
+      propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: GameManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2905764967384224462, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
+      propertyPath: OnClicked.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 2905764967384224463, guid: 33994460efecd9d4794903c0f8d9a630, type: 3}
       propertyPath: m_Name
       value: Quit
@@ -10082,10 +10111,10 @@ MonoBehaviour:
     - rid: 2551363025413341420
       type: {class: SliderVisuals, ns: , asm: Assembly-CSharp}
       data:
-        Label: {fileID: 166500223}
-        SliderBackground: {fileID: 1024391431}
-        FillBar: {fileID: 1565813369}
-        ValueLabel: {fileID: 394629722}
+        label: {fileID: 166500223}
+        sliderBG: {fileID: 1024391431}
+        fillBar: {fileID: 1565813369}
+        valueLabel: {fileID: 394629722}
 --- !u!114 &1997886439
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11648,10 +11677,10 @@ MonoBehaviour:
     - rid: 2551363025413341420
       type: {class: SliderVisuals, ns: , asm: Assembly-CSharp}
       data:
-        Label: {fileID: 1922171429}
-        SliderBackground: {fileID: 21859966}
-        FillBar: {fileID: 1586117103}
-        ValueLabel: {fileID: 1029177547}
+        label: {fileID: 1922171429}
+        sliderBG: {fileID: 21859966}
+        fillBar: {fileID: 1586117103}
+        valueLabel: {fileID: 1029177547}
 --- !u!114 &2111314127
 MonoBehaviour:
   m_ObjectHideFlags: 0

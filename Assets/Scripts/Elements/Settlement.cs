@@ -8,8 +8,8 @@ using UnityEngine.UI;
 public enum SettlementType
 {
     City,
-    RegularTown,
-    RuralTown
+    Town,
+    Rural
 }
 
 public class Settlement : MonoBehaviour
@@ -92,11 +92,11 @@ public class Settlement : MonoBehaviour
         {
             passenger.GetComponent<SpriteRenderer>().sprite = passenger.citySprite;
         }
-        else if (passenger.destination.Type == SettlementType.RegularTown)
+        else if (passenger.destination.Type == SettlementType.Town)
         {
             passenger.GetComponent<SpriteRenderer>().sprite = passenger.townSprite;
         }
-        else if (passenger.destination.Type == SettlementType.RuralTown)
+        else if (passenger.destination.Type == SettlementType.Rural)
         {
             passenger.GetComponent<SpriteRenderer>().sprite = passenger.ruralSprite;
         }

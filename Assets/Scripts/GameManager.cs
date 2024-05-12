@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,8 +22,53 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void GenerateMap(string sceneName)
+    public GameState state;
+    public static event Action OnMapGenerationStart;
+
+    private void Start() {
+        UpdateGameState(GameState.Menu);
+    }
+
+    public void Quit() {
+        Application.Quit();
+    }
+
+    public void UpdateGameState(GameState newState) {
+        state = newState;
+
+        switch (newState) {
+            case GameState.Menu:
+                break;
+            case GameState.MapGeneration:
+                GenerateMap();
+                break;
+            case GameState.Play:
+                break;
+            case GameState.Pause:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
+        }
+
+        
+    }
+
+    public void UpdateGameStateMenu() => UpdateGameState(GameState.Menu);
+    public void UpdateGameStateMapGen() => UpdateGameState(GameState.MapGeneration);
+    public void UpdateGameStatePlay() => UpdateGameState(GameState.Play);
+    public void UpdateGameStatePause() => UpdateGameState(GameState.Pause);
+
+    private void GenerateMap()
     {
         SceneManager.LoadScene("Game");
+        OnMapGenerationStart?.Invoke();
     }
+}
+
+// TODO: Add TimeState enum
+public enum GameState {
+    Menu,
+    MapGeneration,
+    Play,
+    Pause
 }
