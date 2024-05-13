@@ -2,6 +2,26 @@ using UnityEngine;
 
 public class ConnectionHandler : MonoBehaviour
 {
+    public static ConnectionHandler Instance;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
+        ControlHandler.CreateConnection += CreateConnection;
+        ControlHandler.DrawConnection += DrawConnection;
+        ControlHandler.MaintainConnection += MaintainConnection;
+        ControlHandler.DeleteConnection += DeleteConnection;
+    }
+
     [SerializeField]
     private float LINE_WIDTH = 0.5f;
     private GameObject currentConnectionObject;

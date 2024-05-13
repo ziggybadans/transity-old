@@ -1,33 +1,49 @@
+using System;
 using UnityEngine;
 
 public class ControlHandler : MonoBehaviour
 {
-    [SerializeReference]
-    private MapGenerator mapGenerator;
-    private ConnectionHandler connectionHandler;
+    public static ControlHandler Instance;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private static event Action UpdateProbabilities;
+    public static event Action DrawConnection, MaintainConnection, CreateConnection, DeleteConnection;
     private bool drawing;
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0)) {
-            connectionHandler.DrawConnection();
+        if (Input.GetMouseButtonDown(0))
+        {
+            DrawConnection?.Invoke();
             drawing = true;
         }
         if (Input.GetMouseButton(0) && drawing)
         {
-            connectionHandler.MaintainConnection();
+            MaintainConnection?.Invoke();
         }
         if (Input.GetMouseButtonUp(0) && drawing)
         {
-            connectionHandler.CreateConnection();
+            CreateConnection?.Invoke();
             drawing = false;
         }
-        if (Input.GetMouseButtonDown(1) && !drawing) connectionHandler.DeleteConnection();
+        if (Input.GetMouseButtonDown(1) && !drawing) DeleteConnection?.Invoke();
 
         if (Input.GetKeyDown(KeyCode.BackQuote))
         {
             SetDebugMode();
-            mapGenerator.UpdateProbabilities();
+            UpdateProbabilities?.Invoke();
         }
     }
 

@@ -9,9 +9,15 @@ public class MapGenerator : MonoBehaviour
     private GridManager _grid;
     private int _numCellsX, _numCellsY;
 
+    public static event Action OnMapGenerationFinish;
+
     private void Awake()
     {
         GameManager.OnMapGenerationStart += Initialize;
+    }
+
+    private void OnDestroy() {
+        GameManager.OnMapGenerationStart -= Initialize;
     }
 
     private void Initialize()
@@ -25,6 +31,9 @@ public class MapGenerator : MonoBehaviour
 
         UpdateProbabilities();
         GenerateMap();
+
+        OnMapGenerationFinish?.Invoke();
+        Destroy(this);
     }
 
     private void GenerateMap()
@@ -61,9 +70,9 @@ public class MapGenerator : MonoBehaviour
         };
         Settlement settlement = Instantiate(prefab, currentCell.transform.position + (Vector3.forward * -2f), Quaternion.identity, currentCell.transform);
         settlement.Type = settlementType;
-        settlement.entityPrefab = _passengerEntityPrefab;
-        settlement.map = gameObject;
-        settlement.parentCell = currentCell;
+        settlement.EntityPrefab = _passengerEntityPrefab;
+        settlement.Map = gameObject;
+        settlement.ParentCell = currentCell;
         currentCell.Settlement = settlement;
     }
 

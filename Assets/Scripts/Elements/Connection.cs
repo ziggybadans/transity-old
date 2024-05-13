@@ -4,19 +4,19 @@ using UnityEngine;
 
 public class Connection : MonoBehaviour
 {
-    private Settlement startTown, endTown;
-    private List<GameObject> entities = new();
-    private GameObject entityPrefab;
+    private Settlement _startTown, _endTown;
+    private List<GameObject> _entities = new();
+    private GameObject _entityPrefab;
     private float ENTITY_SPEED = 1f;
     private int CAPACITY = 6;
     private int NUM_ENTITIES = 1;
 
     public void SetupConnection(Settlement startTown, Settlement endTown)
     {
-        this.startTown = startTown;
-        this.endTown = endTown;
+        this._startTown = startTown;
+        this._endTown = endTown;
 
-        StartCoroutine(SpawnEntitiesCoroutine(this.startTown, this.endTown));
+        StartCoroutine(SpawnEntitiesCoroutine(this._startTown, this._endTown));
     }
 
     private IEnumerator SpawnEntitiesCoroutine(Settlement startTown, Settlement endTown)
@@ -32,8 +32,8 @@ public class Connection : MonoBehaviour
         {
             Vector3 spawnPos = startPos + (i * spacing * direction);
             spawnPos.z = -2f;
-            GameObject entity = Instantiate(entityPrefab, spawnPos, Quaternion.identity);
-            entities.Add(entity);
+            GameObject entity = Instantiate(_entityPrefab, spawnPos, Quaternion.identity);
+            _entities.Add(entity);
 
             SetupEntity(entity.GetComponent<Transport>(), i, startTown, endTown);
 
@@ -42,21 +42,21 @@ public class Connection : MonoBehaviour
     }
 
     private Vector3 GetPosFromSettlement(Settlement settlement) {
-        return settlement.parentCell.transform.position;
+        return settlement.ParentCell.transform.position;
     }
 
     private void SetupEntity(Transport entity, int i, Settlement startTown, Settlement endTown) {
-        entity.movingForward = i % 2 != 0;
-        entity.startTown = startTown;
-        entity.endTown = endTown;
-        entity.entitySpeed = ENTITY_SPEED;
-        entity.capacity = CAPACITY;
+        entity.MovingForward = i % 2 != 0;
+        entity._startTown = startTown;
+        entity._endTown = endTown;
+        entity.EntitySpeed = ENTITY_SPEED;
+        entity.Capacity = CAPACITY;
     }
 
     public void DestroyAllEntities() {
-        foreach (GameObject entity in entities) {
+        foreach (GameObject entity in _entities) {
             Destroy(entity);
         }
-        entities.Clear();
+        _entities.Clear();
     }
 }

@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     // Singleton references
-    [SerializeReference]
     public static GameManager Instance;
 
     private void Awake()
@@ -19,6 +18,8 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        MapGenerator.OnMapGenerationFinish += UpdateGameStatePlay;
     }
 
     // Main game logic
@@ -43,6 +44,7 @@ public class GameManager : MonoBehaviour
                 GenerateMap();
                 break;
             case GameState.Play:
+                MapGenerator.OnMapGenerationFinish -= UpdateGameStatePlay;
                 break;
             case GameState.Pause:
                 break;

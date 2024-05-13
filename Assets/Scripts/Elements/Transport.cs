@@ -4,24 +4,24 @@ using UnityEngine;
 
 public class Transport : MonoBehaviour
 {
-    public bool movingForward;
-    private int boarding = 0;
+    public bool MovingForward;
+    private int _boarding = 0;
     // 0 = moving, 1 = boarding, 2 = ready to depart
-    public float entitySpeed;
-    public int capacity;
-    private Vector3 startPos, endPos;
-    public Settlement startTown, endTown;
-    private GameObject passengerObj;
-    private List<Passenger> passengers = new();
+    public float EntitySpeed;
+    public int Capacity;
+    private Vector3 _startPos, _endPos;
+    public Settlement _startTown, _endTown;
+    private GameObject _passengerObj;
+    private List<Passenger> _passengers = new();
 
-    public List<Passenger> GetPassengers() { return passengers; }
+    public List<Passenger> GetPassengers() { return _passengers; }
 
     private void Start()
     {
-        passengerObj = new GameObject("PassengerContainer");
-        passengerObj.transform.parent = transform;
-        passengerObj.transform.SetLocalPositionAndRotation(new Vector3(-0.25f, 0f, -3f), Quaternion.identity);
-        passengerObj.transform.localScale *= 0.8f;
+        _passengerObj = new GameObject("PassengerContainer");
+        _passengerObj.transform.parent = transform;
+        _passengerObj.transform.SetLocalPositionAndRotation(new Vector3(-0.25f, 0f, -3f), Quaternion.identity);
+        _passengerObj.transform.localScale *= 0.8f;
     }
 
     private void Update()
@@ -31,59 +31,59 @@ public class Transport : MonoBehaviour
         // Check to see if the transport is at a train
         Vector2 pos = transform.position;
         RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.zero);
-        if ((pos.Equals(startPos) && startTown != null) || (pos.Equals(endPos) && endTown != null))
+        if ((pos.Equals(_startPos) && _startTown != null) || (pos.Equals(_endPos) && _endTown != null))
         {
             // As long as it's not already boarding, the train can start boarding
-            if (boarding == 0)
+            if (_boarding == 0)
             {
-                boarding = 1;
-                StartCoroutine(BoardAndAlight(pos.Equals(startPos) ? startTown : endTown));
+                _boarding = 1;
+                StartCoroutine(BoardAndAlight(pos.Equals(_startPos) ? _startTown : _endTown));
             }
         }
         else
         {
             // Reversing direction on the connection
-            if (movingForward)
+            if (MovingForward)
             {
-                MoveTransport(endPos);
-                if (transform.position.Equals(endPos)) movingForward = false;
+                MoveTransport(_endPos);
+                if (transform.position.Equals(_endPos)) MovingForward = false;
             }
             else
             {
-                MoveTransport(startPos);
-                if (transform.position.Equals(startPos)) movingForward = true;
+                MoveTransport(_startPos);
+                if (transform.position.Equals(_startPos)) MovingForward = true;
             }
         }
 
-        if (boarding == 2)
+        if (_boarding == 2)
         {
-            if (movingForward)
+            if (MovingForward)
             {
-                MoveTransport(endPos);
-                if (transform.position.Equals(endPos)) movingForward = false;
+                MoveTransport(_endPos);
+                if (transform.position.Equals(_endPos)) MovingForward = false;
             }
             else
             {
-                MoveTransport(startPos);
-                if (transform.position.Equals(startPos)) movingForward = true;
+                MoveTransport(_startPos);
+                if (transform.position.Equals(_startPos)) MovingForward = true;
             }
             if (!(hit.collider != null && hit.collider.CompareTag("Settlement")))
             {
-                boarding = 0;
+                _boarding = 0;
             }
         }
     }
 
     private void PositionPassengers()
     {
-        for (int i = 0; i < passengers.Count; i++)
+        for (int i = 0; i < _passengers.Count; i++)
         {
             int row = i / 2;
             int column = i % 2;
             Vector3 passengerPosition = new(column * 0.2f, -row * 0.2f, 0f);
 
-            passengers[i].transform.SetParent(passengerObj.transform, false);
-            passengers[i].transform.SetLocalPositionAndRotation(passengerPosition, Quaternion.identity);
+            _passengers[i].transform.SetParent(_passengerObj.transform, false);
+            _passengers[i].transform.SetLocalPositionAndRotation(passengerPosition, Quaternion.identity);
         }
     }
 
@@ -91,7 +91,7 @@ public class Transport : MonoBehaviour
     {
         Vector3 direction = targetPos - transform.position;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-        transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, targetPos, entitySpeed * Time.deltaTime), Quaternion.Euler(0f, 0f, angle));
+        transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, targetPos, EntitySpeed * Time.deltaTime), Quaternion.Euler(0f, 0f, angle));
     }
 
     private IEnumerator BoardAndAlight(Settlement settlement)
@@ -102,14 +102,14 @@ public class Transport : MonoBehaviour
         {
             // Check if there are passengers waiting to board
             int passengersWaiting = settlement.GetPassengersWaiting();
-            if (passengersWaiting > 0 && passengers.Count < capacity)
+            if (passengersWaiting > 0 && _passengers.Count < Capacity)
             {
                 // Board passengers one by one
                 PassengersBoarding(settlement);
             }
 
             // Check if there are passengers on board
-            if (passengers.Count > 0)
+            if (_passengers.Count > 0)
             {
                 // Alight passengers one by one
                 PassengersAlighting(settlement);
@@ -119,7 +119,7 @@ public class Transport : MonoBehaviour
         }
 
         // Reset boarding flag and resume movement
-        boarding = 2;
+        _boarding = 2;
     }
 
     private void PassengersBoarding(Settlement settlement)
@@ -127,21 +127,21 @@ public class Transport : MonoBehaviour
         Passenger passenger = settlement.AlightPassenger(this);
         if (passenger != null)
         {
-            passengers.Add(passenger);
+            _passengers.Add(passenger);
             passenger.gameObject.transform.localScale *= 0.35f;
             passenger.GetComponent<SpriteRenderer>().material.color = new Color(0f, 0f, 0f, 1f);
-            Debug.Log("New passenger boarded! Number of passengers: " + passengers.Count);
+            Debug.Log("New passenger boarded! Number of passengers: " + _passengers.Count);
         }
     }
 
     private void PassengersAlighting(Settlement settlement)
     {
-        for (int i = passengers.Count - 1; i >= 0; i--)
+        for (int i = _passengers.Count - 1; i >= 0; i--)
         {
-            if (passengers[i].origin != settlement)
+            if (_passengers[i].Origin != settlement)
             {
-                Destroy(passengers[i].gameObject);
-                passengers.RemoveAt(i);
+                Destroy(_passengers[i].gameObject);
+                _passengers.RemoveAt(i);
             }
         }
     }
