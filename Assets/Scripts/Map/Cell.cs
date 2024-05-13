@@ -1,8 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using TMPro;
-using Unity.Collections;
 using UnityEngine;
 
 public class Cell : MonoBehaviour
@@ -14,14 +9,6 @@ public class Cell : MonoBehaviour
         float cellSize = GridManager.Instance.GRID_CELL_SIZE;
         float x = transform.position.x * cellSize + (cellSize / 2f);
         float y = transform.position.y * cellSize + (cellSize / 2f);
-    }
-
-    public bool HasSettlement() {
-        if (Settlement != null) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     public void SetAllProbabilities(float value) {

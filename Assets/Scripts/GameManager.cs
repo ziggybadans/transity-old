@@ -1,11 +1,10 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    // Singleton references
     [SerializeReference]
     public static GameManager Instance;
 
@@ -22,6 +21,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Main game logic
     public GameState state;
     public static event Action OnMapGenerationStart;
 
@@ -63,6 +63,22 @@ public class GameManager : MonoBehaviour
     }
 
     public int DebugMode { get; set; }
+
+    // Asset managing
+    public Sprite CitySettlementSprite;
+    public Sprite TownSettlementSprite;
+    public Sprite RuralSettlementSprite;
+
+    public Sprite TransportSprite;
+    public Sprite CellSprite;
+
+    public GameObject CitySettlementPrefab;
+    public GameObject TownSettlementPrefab;
+    public GameObject RuralSettlementPrefab;
+
+    public GameObject TransportPrefab;
+
+    public Material ConnectionMaterial;
 }
 
 // TODO: Add TimeState enum

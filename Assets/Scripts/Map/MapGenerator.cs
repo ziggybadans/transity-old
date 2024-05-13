@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
@@ -8,11 +7,7 @@ public class MapGenerator : MonoBehaviour
     private Settlement _cityPrefab, _townPrefab, _ruralPrefab;
     private GameObject _passengerEntityPrefab;
     private GridManager _grid;
-    private static ControlHandler s_controlHandler;
     private int _numCellsX, _numCellsY;
-    private List<Settlement> _settlements = new();
-
-    public List<Settlement> GetSettlements() { return _settlements; }
 
     private void Awake()
     {
@@ -47,7 +42,7 @@ public class MapGenerator : MonoBehaviour
         float spawnProbability = currentCell.GetProbability(settlementType);
 
         float r = UnityEngine.Random.Range(0, 100) / 100f;
-        if (spawnProbability > r && !currentCell.HasSettlement())
+        if (spawnProbability > r && currentCell.Settlement != null)
         {
             SpawnSettlement(currentCell, settlementType);
         }
@@ -69,7 +64,6 @@ public class MapGenerator : MonoBehaviour
         settlement.entityPrefab = _passengerEntityPrefab;
         settlement.map = gameObject;
         settlement.parentCell = currentCell;
-        _settlements.Add(settlement);
         currentCell.Settlement = settlement;
     }
 
@@ -81,7 +75,7 @@ public class MapGenerator : MonoBehaviour
             for (int y = 0; y < _numCellsY; y++)
             {
                 Cell currentCell = _grid.GetCellFromPosition(new Vector2Int(x, y));
-                if (currentCell.HasSettlement()) currentCell.SetAllProbabilities(0f);
+                if (currentCell.Settlement != null) currentCell.SetAllProbabilities(0f);
                 else
                 {
                     currentCell.SetAllProbabilities(1f);
@@ -90,7 +84,7 @@ public class MapGenerator : MonoBehaviour
                     {
                         if (cell == currentCell) continue;
 
-                        if (cell.HasSettlement())
+                        if (cell.Settlement != null)
                         {
                             float distance = CalculateDistance(currentCell, cell);
 

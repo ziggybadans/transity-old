@@ -1,9 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.UI;
 
 public enum SettlementType { City, Town, Rural }
 
@@ -13,7 +10,7 @@ public class Settlement : MonoBehaviour
     public GameObject entityPrefab;
     public GameObject map;
     [Min(0.1f)]
-    public float spawnInterval = 3f;
+    private readonly float spawnInterval = 3f;
     private List<Passenger> passengers = new();
     public SettlementType Type { get; set; }
 
@@ -71,7 +68,10 @@ public class Settlement : MonoBehaviour
         Passenger newPassenger = newEntity.GetComponent<Passenger>();
         newPassenger.origin = this;
 
-        List<Settlement> settlements = map.GetComponent<MapGenerator>().GetSettlements();
+        List<Settlement> settlements = new();
+        foreach (Cell cell in GridManager.Instance.GetCells()) {
+            if (cell.Settlement != null) settlements.Add(cell.Settlement);
+        }
         Settlement randomSettlement = settlements[UnityEngine.Random.Range(0, settlements.Count)];
         while (randomSettlement == newPassenger.origin)
         {
@@ -86,10 +86,10 @@ public class Settlement : MonoBehaviour
     {
         passenger.GetComponent<SpriteRenderer>().sprite = passenger.destination.Type switch
         {
-            SettlementType.City => passenger.citySprite,
-            SettlementType.Town => passenger.townSprite,
-            SettlementType.Rural => passenger.ruralSprite,
-            _ => passenger.ruralSprite,
+            SettlementType.City => GameManager.Instance.CitySettlementSprite,
+            SettlementType.Town => GameManager.Instance.TownSettlementSprite,
+            SettlementType.Rural => GameManager.Instance.RuralSettlementSprite,
+            _ => GameManager.Instance.RuralSettlementSprite,
         };
     }
 

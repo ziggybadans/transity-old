@@ -1,30 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Transport : MonoBehaviour
 {
     public bool movingForward;
-    public int boarding = 0;
+    private int boarding = 0;
     // 0 = moving, 1 = boarding, 2 = ready to depart
     public float entitySpeed;
     public int capacity;
-    public Vector3 startPos, endPos;
+    private Vector3 startPos, endPos;
     public Settlement startTown, endTown;
-    private GameObject childObj;
+    private GameObject passengerObj;
     private List<Passenger> passengers = new();
 
     public List<Passenger> GetPassengers() { return passengers; }
 
     private void Start()
     {
-        childObj = new GameObject("PassengerContainer");
-        childObj.transform.parent = transform;
-        childObj.transform.localPosition = new Vector3(-0.25f, 0f, -3f);
-        childObj.transform.localRotation = Quaternion.identity;
-        childObj.transform.localScale *= 0.8f;
+        passengerObj = new GameObject("PassengerContainer");
+        passengerObj.transform.parent = transform;
+        passengerObj.transform.SetLocalPositionAndRotation(new Vector3(-0.25f, 0f, -3f), Quaternion.identity);
+        passengerObj.transform.localScale *= 0.8f;
     }
 
     private void Update()
@@ -85,7 +82,7 @@ public class Transport : MonoBehaviour
             int column = i % 2;
             Vector3 passengerPosition = new(column * 0.2f, -row * 0.2f, 0f);
 
-            passengers[i].transform.SetParent(childObj.transform, false);
+            passengers[i].transform.SetParent(passengerObj.transform, false);
             passengers[i].transform.SetLocalPositionAndRotation(passengerPosition, Quaternion.identity);
         }
     }

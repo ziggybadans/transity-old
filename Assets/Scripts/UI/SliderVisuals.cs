@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using Nova;
-using UnityEngine;
 
 [System.Serializable]
 public class SliderVisuals : ItemVisuals

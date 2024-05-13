@@ -1,10 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using Nova;
-using NovaSamples.UIControls;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class SettingsMenu : MonoBehaviour
 {
