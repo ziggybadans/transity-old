@@ -5,15 +5,11 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum SettlementType
-{
-    City,
-    Town,
-    Rural
-}
+public enum SettlementType { City, Town, Rural }
 
 public class Settlement : MonoBehaviour
 {
+    public Cell parentCell;
     public GameObject entityPrefab;
     public GameObject map;
     [Min(0.1f)]
@@ -55,19 +51,19 @@ public class Settlement : MonoBehaviour
     {
         for (int i = 0; i < passengers.Count; i++)
         {
-            if (i == 0)
+            passengers[i].gameObject.transform.position = i switch
             {
-                passengers[i].gameObject.transform.position = new Vector2(transform.position.x, transform.position.y) + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.up * 0.5f);
-            }
-            else
-            {
-                passengers[i].gameObject.transform.position = passengers[i - 1].transform.position + (1.3f * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * Vector3.left);
-                if (i == 5)
-                {
-                    passengers[i].gameObject.transform.position = new Vector2(transform.position.x, transform.position.y) + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x) + (Vector2.down * 0.1f);
-                }
-            }
+                0 => (Vector3)(GetPassengerInitialPos() + (Vector2.up * 0.5f)),
+                5 => (Vector3)(GetPassengerInitialPos() + (Vector2.down * 0.1f)),
+                _ => passengers[i - 1].transform.position +
+                        (1.3f * passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * Vector3.left),
+            };
         }
+    }
+
+    private Vector2 GetPassengerInitialPos() {
+        Vector2 vector2 = new Vector2(transform.position.x, transform.position.y) + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x);
+        return vector2;
     }
 
     private Passenger SetupNewPassenger(GameObject newEntity)
@@ -88,18 +84,13 @@ public class Settlement : MonoBehaviour
 
     private void SetPassengerSprite(Passenger passenger)
     {
-        if (passenger.destination.Type == SettlementType.City)
+        passenger.GetComponent<SpriteRenderer>().sprite = passenger.destination.Type switch
         {
-            passenger.GetComponent<SpriteRenderer>().sprite = passenger.citySprite;
-        }
-        else if (passenger.destination.Type == SettlementType.Town)
-        {
-            passenger.GetComponent<SpriteRenderer>().sprite = passenger.townSprite;
-        }
-        else if (passenger.destination.Type == SettlementType.Rural)
-        {
-            passenger.GetComponent<SpriteRenderer>().sprite = passenger.ruralSprite;
-        }
+            SettlementType.City => passenger.citySprite,
+            SettlementType.Town => passenger.townSprite,
+            SettlementType.Rural => passenger.ruralSprite,
+            _ => passenger.ruralSprite,
+        };
     }
 
     private void SetPassengerOpacity()

@@ -130,7 +130,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Landscaping@4x_0: 6592550064152778142
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

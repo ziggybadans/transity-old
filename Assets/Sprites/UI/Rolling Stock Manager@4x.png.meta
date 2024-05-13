@@ -130,7 +130,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Rolling Stock Manager@4x_0: 4709956109094199601
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

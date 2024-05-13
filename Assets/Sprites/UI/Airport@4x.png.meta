@@ -178,7 +178,10 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Airport@4x_0: -1429205555612035876
+      Airport@4x_1: 1521681309717165617
+      Airport@4x_2: 6010219499569818093
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

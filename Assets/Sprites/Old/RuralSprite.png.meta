@@ -130,7 +130,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      RuralSprite_0: -4696721617447184003
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

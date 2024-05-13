@@ -7,13 +7,13 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [SerializeReference]
-    public static GameManager GameInstance;
+    public static GameManager Instance;
 
     private void Awake()
     {
-        if (GameInstance == null)
+        if (Instance == null)
         {
-            GameInstance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -49,8 +49,6 @@ public class GameManager : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
         }
-
-        
     }
 
     public void UpdateGameStateMenu() => UpdateGameState(GameState.Menu);
@@ -63,6 +61,8 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("Game");
         OnMapGenerationStart?.Invoke();
     }
+
+    public int DebugMode { get; set; }
 }
 
 // TODO: Add TimeState enum

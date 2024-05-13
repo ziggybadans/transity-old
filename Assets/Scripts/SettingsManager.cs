@@ -8,13 +8,13 @@ public enum SettingsTypes {
 
 public class SettingsManager : MonoBehaviour
 {
-    public static SettingsManager SettingsInstance { get; private set; }
+    public static SettingsManager Instance { get; private set; }
 
     private Dictionary<SettingsTypes, int> _mapGenValues = new();
 
     private void Awake() {
-        if (SettingsInstance == null) {
-            SettingsInstance = this;
+        if (Instance == null) {
+            Instance = this;
             DontDestroyOnLoad(gameObject);
         } else {
             Destroy(gameObject);

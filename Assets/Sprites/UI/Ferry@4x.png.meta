@@ -154,7 +154,9 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Ferry@4x_0: 5684096336518292736
+      Ferry@4x_1: 5279620108327150728
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

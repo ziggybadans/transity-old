@@ -4,51 +4,53 @@ using UnityEngine;
 
 public class Connection : MonoBehaviour
 {
-    private Vector2 startPos, endPos;
     private Settlement startTown, endTown;
-    private int numEntites;
     private List<GameObject> entities = new();
     private GameObject entityPrefab;
-    private float entitySpeed;
-    private int capacity;
+    private float ENTITY_SPEED = 1f;
+    private int CAPACITY = 6;
+    private int NUM_ENTITIES = 1;
 
-    public void SetupConnection(Vector2 startPos, Vector2 endPos, Settlement startTown, Settlement endTown, int numEntites, GameObject entityPrefab, float entitySpeed, int capacity)
+    public void SetupConnection(Settlement startTown, Settlement endTown)
     {
-        this.startPos = startPos;
-        this.endPos = endPos;
         this.startTown = startTown;
         this.endTown = endTown;
-        this.numEntites = numEntites;
-        this.entityPrefab = entityPrefab;
-        this.entitySpeed = entitySpeed;
-        this.capacity = capacity;
 
-        StartCoroutine(SpawnEntitiesCoroutine(this.startPos, this.endPos));
+        StartCoroutine(SpawnEntitiesCoroutine(this.startTown, this.endTown));
     }
 
-    private IEnumerator SpawnEntitiesCoroutine(Vector3 startPos, Vector3 endPos)
+    private IEnumerator SpawnEntitiesCoroutine(Settlement startTown, Settlement endTown)
     {
+        Vector3 startPos = GetPosFromSettlement(startTown);
+        Vector3 endPos = GetPosFromSettlement(endTown);
+
         Vector3 direction = (endPos - startPos).normalized;
         float lineLength = Vector3.Distance(startPos, endPos);
-        float spacing = lineLength / (numEntites + 1);
+        float spacing = lineLength / (NUM_ENTITIES + 1);
 
-        for (int i = 1; i <= numEntites; i++)
+        for (int i = 1; i <= NUM_ENTITIES; i++)
         {
             Vector3 spawnPos = startPos + (i * spacing * direction);
             spawnPos.z = -2f;
             GameObject entity = Instantiate(entityPrefab, spawnPos, Quaternion.identity);
             entities.Add(entity);
-            
-            entity.GetComponent<Transport>().movingForward = i % 2 != 0;
-            entity.GetComponent<Transport>().startPos = startPos;
-            entity.GetComponent<Transport>().endPos = endPos;
-            entity.GetComponent<Transport>().startTown = startTown;
-            entity.GetComponent<Transport>().endTown = endTown;
-            entity.GetComponent<Transport>().entitySpeed = entitySpeed;
-            entity.GetComponent<Transport>().capacity = capacity;
+
+            SetupEntity(entity.GetComponent<Transport>(), i, startTown, endTown);
 
             yield return new WaitForSeconds(0.1f);
         }
+    }
+
+    private Vector3 GetPosFromSettlement(Settlement settlement) {
+        return settlement.parentCell.transform.position;
+    }
+
+    private void SetupEntity(Transport entity, int i, Settlement startTown, Settlement endTown) {
+        entity.movingForward = i % 2 != 0;
+        entity.startTown = startTown;
+        entity.endTown = endTown;
+        entity.entitySpeed = ENTITY_SPEED;
+        entity.capacity = CAPACITY;
     }
 
     public void DestroyAllEntities() {

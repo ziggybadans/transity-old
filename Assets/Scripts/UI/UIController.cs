@@ -6,13 +6,13 @@ using UnityEngine;
 public class UIController : MonoBehaviour
 {
     [SerializeReference]
-    public static UIController UIInstance;
+    public static UIController Instance;
 
     private void Awake()
     {
-        if (UIInstance == null)
+        if (Instance == null)
         {
-            UIInstance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);
         }
         else

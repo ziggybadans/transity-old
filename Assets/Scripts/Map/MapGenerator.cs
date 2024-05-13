@@ -21,9 +21,9 @@ public class MapGenerator : MonoBehaviour
 
     private void Initialize()
     {
-        _numTriesCities = SettingsManager.SettingsInstance.GetMapGenValue(SettingsTypes.NumCities);
-        _numTriesTowns = SettingsManager.SettingsInstance.GetMapGenValue(SettingsTypes.NumTowns);
-        _numTriesRural = SettingsManager.SettingsInstance.GetMapGenValue(SettingsTypes.NumRurals);
+        _numTriesCities = SettingsManager.Instance.GetMapGenValue(SettingsTypes.NumCities);
+        _numTriesTowns = SettingsManager.Instance.GetMapGenValue(SettingsTypes.NumTowns);
+        _numTriesRural = SettingsManager.Instance.GetMapGenValue(SettingsTypes.NumRurals);
 
         _numCellsX = _grid.GRID_WIDTH;
         _numCellsY = _grid.GRID_HEIGHT;
@@ -44,13 +44,7 @@ public class MapGenerator : MonoBehaviour
         int x = UnityEngine.Random.Range(0, _numCellsX - 1);
         int y = UnityEngine.Random.Range(0, _numCellsY - 1);
         Cell currentCell = _grid.GetCellFromPosition(new Vector2Int(x, y));
-        float spawnProbability = settlementType switch
-        {
-            SettlementType.City => currentCell.ruralSpawnProbability,
-            SettlementType.Town => currentCell.townSpawnProbability,
-            SettlementType.Rural => currentCell.ruralSpawnProbability,
-            _ => currentCell.ruralSpawnProbability,
-        };
+        float spawnProbability = currentCell.GetProbability(settlementType);
 
         float r = UnityEngine.Random.Range(0, 100) / 100f;
         if (spawnProbability > r && !currentCell.HasSettlement())
@@ -74,8 +68,9 @@ public class MapGenerator : MonoBehaviour
         settlement.Type = settlementType;
         settlement.entityPrefab = _passengerEntityPrefab;
         settlement.map = gameObject;
+        settlement.parentCell = currentCell;
         _settlements.Add(settlement);
-        currentCell.settlement = settlement;
+        currentCell.Settlement = settlement;
     }
 
     public void UpdateProbabilities()
@@ -99,11 +94,12 @@ public class MapGenerator : MonoBehaviour
                         {
                             float distance = CalculateDistance(currentCell, cell);
 
-                            if (cell.settlement.Type == SettlementType.City) CalculateCityProbability(currentCell, distance);
-                            if (cell.settlement.Type == SettlementType.Town) CalculateTownProbability(currentCell, distance);
-                            if (cell.settlement.Type == SettlementType.Rural) CalculateRuralProbability(currentCell, distance);
+                            if (cell.Settlement.Type == SettlementType.City) CalculateCityProbability(currentCell, distance);
+                            if (cell.Settlement.Type == SettlementType.Town) CalculateTownProbability(currentCell, distance);
+                            if (cell.Settlement.Type == SettlementType.Rural) CalculateRuralProbability(currentCell, distance);
                         }
-                        currentCell.ruralSpawnProbability = currentCell.citySpawnProbability * 2 * currentCell.townSpawnProbability;
+                        float ruralProbability = currentCell.GetProbability(SettlementType.City) * 2 * currentCell.GetProbability(SettlementType.Town);
+                        currentCell.SetProbability(SettlementType.Rural, ruralProbability);
                     }
                 }
 
@@ -123,32 +119,36 @@ public class MapGenerator : MonoBehaviour
 
     private void CalculateCityProbability(Cell currentCell, float distance)
     {
-        float cityProbability = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f) / 100f);
-        currentCell.citySpawnProbability *= cityProbability / (cityProbability > 0 ? 2 : 0);
+        float cityCalculation = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f) / 100f);
+        float cityProbability = currentCell.GetProbability(SettlementType.City) * cityCalculation / (cityCalculation > 0 ? 2 : 0);
+        currentCell.SetProbability(SettlementType.City, cityProbability);
 
-        float townProbability = 25f;
+        float townCalculation = 25f;
         if (distance < 4)
         {
-            townProbability = Mathf.Pow(distance + 1, 3);
+            townCalculation = Mathf.Pow(distance + 1, 3);
         }
         else if (distance > 4 && distance < 15)
         {
-            townProbability = -1f * Mathf.Pow((0.5f * distance) - 2, 2) + 75;
+            townCalculation = -1f * Mathf.Pow((0.5f * distance) - 2, 2) + 75;
         }
 
-        currentCell.townSpawnProbability = Mathf.Max(0.25f, townProbability / 100f, 
-            currentCell.townSpawnProbability < 1f ? currentCell.townSpawnProbability : 0);
+        float townProbability = Mathf.Max(0.25f, townCalculation / 100f, 
+            currentCell.GetProbability(SettlementType.Town) < 1f ? currentCell.GetProbability(SettlementType.Town) : 0);
+        currentCell.SetProbability(SettlementType.Town, townProbability);
     }
 
     private void CalculateTownProbability(Cell currentCell, float distance)
     {
         if (distance <= 3)
         {
-            float townProbability = Mathf.Max(0, (100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f);
-            currentCell.townSpawnProbability = Mathf.Min(townProbability / 100f, currentCell.townSpawnProbability);
+            float townCalculation = Mathf.Max(0, (100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f);
+            float townProbability = Mathf.Min(townCalculation / 100f, currentCell.GetProbability(SettlementType.Town));
+            currentCell.SetProbability(SettlementType.Town, townProbability);
 
-            float cityProbability = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f) / 0.75f);
-            currentCell.citySpawnProbability = Mathf.Min(cityProbability / 100f, currentCell.citySpawnProbability);
+            float cityCalculation = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f) / 0.75f);
+            float cityProbability = Mathf.Min(cityCalculation / 100f, currentCell.GetProbability(SettlementType.City));
+            currentCell.SetProbability(SettlementType.City, cityProbability);
         }
     }
 
@@ -159,20 +159,20 @@ public class MapGenerator : MonoBehaviour
 
     private bool UpdateDebugOverlay(bool debugMessageSent, Cell currentCell)
     {
-        int debugMode = s_controlHandler.GetDebugMode();
+        int debugMode = GameManager.Instance.DebugMode;
         float clampedProbability;
         switch (debugMode)
         {
             case 1:
-                clampedProbability = currentCell.citySpawnProbability * 2;
+                clampedProbability = currentCell.GetProbability(SettlementType.City) * 2;
                 if (!debugMessageSent) Debug.Log("Debug mode: City Heatmap");
                 break;
             case 2:
-                clampedProbability = currentCell.townSpawnProbability;
+                clampedProbability = currentCell.GetProbability(SettlementType.Town);
                 if (!debugMessageSent) Debug.Log("Debug mode: Town Heatmap");
                 break;
             case 3:
-                clampedProbability = currentCell.ruralSpawnProbability;
+                clampedProbability = currentCell.GetProbability(SettlementType.Rural);
                 if (!debugMessageSent) Debug.Log("Debug mode: Rural Heatmap");
                 break;
             default:

@@ -5,27 +5,23 @@ using UnityEngine;
 
 public class ControlHandler : MonoBehaviour
 {
-    [Range(1, 4)]
-    public int numEntites = 2;
-    [Range(0.5f, 4)]
-    public float entitySpeed = 1;
-    [Range(1, 6)]
-    public int capacity = 6;
-    public Material lineMaterial;
-    public GameObject entityPrefab;
-    public MapGenerator mapGenerator;
+    [SerializeReference]
+    private Material lineMaterial;
+    [SerializeReference]
+    private GameObject entityPrefab;
+    [SerializeReference]
+    private MapGenerator mapGenerator;
 
     private Camera cam;
-    private int debugMode = 0;
-    private float lineWidth = 0.5f;
+    [SerializeField]
+    private float LINE_WIDTH = 0.5f;
+    private float CAPACITY = 6;
     private bool drawing;
     private GameObject currentConnectionObject;
     private LineRenderer currentConnectionObjectLr;
     private Vector2 startPos, endPos;
     private Settlement startTown, endTown;
     private List<Connection> connections = new();
-
-    public int GetDebugMode() { return debugMode; }
 
     private void Start()
     {
@@ -34,11 +30,8 @@ public class ControlHandler : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            DrawConnection();
-        }
-        if (drawing)
+        if (Input.GetMouseButtonDown(0)) DrawConnection();
+        if (Input.GetMouseButton(0) && drawing)
         {
             Vector3 currentPos = cam.ScreenToWorldPoint(Input.mousePosition);
             currentPos.z = 0f;
@@ -49,23 +42,26 @@ public class ControlHandler : MonoBehaviour
             drawing = false;
             CreateConnection();
         }
-        if (Input.GetMouseButtonDown(1) && !drawing)
-        {
-            DeleteConnection();
-        }
+        if (Input.GetMouseButtonDown(1) && !drawing) DeleteConnection();
 
-        if (Input.GetKeyDown("`"))
+        if (Input.GetKeyDown(KeyCode.BackQuote))
         {
-            if (debugMode == 3)
-            {
-                debugMode = 0;
-            }
-            else
-            {
-                debugMode++;
-            }
+            SetDebugMode();
             mapGenerator.UpdateProbabilities();
         }
+    }
+
+    private void SetDebugMode()
+    {
+        GameManager GameInstance = GameManager.Instance;
+        if (GameInstance.DebugMode == 3) GameInstance.DebugMode = 0;
+        else GameInstance.DebugMode++;
+    }
+
+    private void SetupConnectionVisuals(LineRenderer lr, Vector3 startPos, Vector3 endPos)
+    {
+        ConfigureLineRenderer(lr, startPos, endPos);
+        SetMesh(lr);
     }
 
     private void ConfigureLineRenderer(LineRenderer lr, Vector3 startPos, Vector3 endPos)
@@ -73,15 +69,13 @@ public class ControlHandler : MonoBehaviour
         lr.positionCount = 2;
         lr.SetPosition(0, startPos);
         lr.SetPosition(1, endPos);
-        lr.startWidth = lineWidth;
-        lr.endWidth = lineWidth;
+        lr.startWidth = LINE_WIDTH;
+        lr.endWidth = LINE_WIDTH;
         lr.material = lineMaterial;
     }
 
-    private void SetupConnectionVisuals(LineRenderer lr, Vector3 startPos, Vector3 endPos)
+    private void SetMesh(LineRenderer lr)
     {
-        ConfigureLineRenderer(lr, startPos, endPos);
-
         MeshCollider connectionMesh = currentConnectionObject.AddComponent<MeshCollider>();
         Mesh mesh = new();
         lr.BakeMesh(mesh, cam, true);
@@ -90,18 +84,16 @@ public class ControlHandler : MonoBehaviour
 
     private void DrawConnection()
     {
-        Vector2 clickPos = cam.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.Raycast(clickPos, Vector2.zero);
-
-        if (hit.collider != null && hit.collider.CompareTag("Settlement"))
+        RaycastHit2D clickPosHit = Raycast();
+        if (clickPosHit.collider != null && clickPosHit.collider.CompareTag("Settlement"))
         {
             drawing = true;
 
             currentConnectionObject = new GameObject("Connection");
             currentConnectionObjectLr = currentConnectionObject.AddComponent<LineRenderer>();
 
-            startPos = hit.collider.transform.position;
-            startTown = hit.collider.GetComponent<Settlement>();
+            startPos = clickPosHit.collider.transform.position;
+            startTown = clickPosHit.collider.GetComponent<Settlement>();
 
             ConfigureLineRenderer(currentConnectionObjectLr, startPos, startPos);
         }
@@ -109,34 +101,26 @@ public class ControlHandler : MonoBehaviour
 
     private void CreateConnection()
     {
-        Vector2 liftPos = cam.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.Raycast(liftPos, Vector2.zero);
-
-        if (hit.collider != null && hit.collider.CompareTag("Settlement"))
+        RaycastHit2D liftPosHit = Raycast();
+        if (liftPosHit.collider != null && liftPosHit.collider.CompareTag("Settlement"))
         {
-            endPos = hit.collider.transform.position;
-            endTown = hit.collider.GetComponent<Settlement>();
+            endPos = liftPosHit.collider.transform.position;
+            endTown = liftPosHit.collider.GetComponent<Settlement>();
+
             if (startTown != endTown)
             {
                 currentConnectionObjectLr.SetPosition(1, endPos);
 
                 Connection currentConnection = currentConnectionObject.AddComponent<Connection>();
-                currentConnection.SetupConnection(startPos, endPos, startTown, endTown, numEntites, entityPrefab, entitySpeed, capacity);
+                currentConnection.SetupConnection(startTown, endTown);
                 currentConnectionObject.tag = "Connection";
 
                 SetupConnectionVisuals(currentConnectionObjectLr, startPos, endPos);
 
                 connections.Add(currentConnection);
-            }
-            else
-            {
-                Destroy(currentConnectionObject);
-            }
+            } else Destroy(currentConnectionObject);
         }
-        else
-        {
-            Destroy(currentConnectionObject);
-        }
+        else Destroy(currentConnectionObject);
     }
 
     private void DeleteConnection()
@@ -152,5 +136,11 @@ public class ControlHandler : MonoBehaviour
                 Destroy(hit.collider.gameObject);
             }
         }
+    }
+
+    private RaycastHit2D Raycast() {
+        Vector2 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
+        RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
+        return hit;
     }
 }
