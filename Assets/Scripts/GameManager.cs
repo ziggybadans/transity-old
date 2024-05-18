@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -6,6 +7,8 @@ public class GameManager : MonoBehaviour
 {
     // Singleton references
     public static GameManager Instance;
+    public event Action OnMapGenerationStart;
+    public event Action OnDebugModeChanged;
 
     private void Awake()
     {
@@ -24,7 +27,6 @@ public class GameManager : MonoBehaviour
 
     // Main game logic
     public GameState state;
-    public static event Action OnMapGenerationStart;
 
     private void Start() {
         UpdateGameState(GameState.Menu);
@@ -41,7 +43,7 @@ public class GameManager : MonoBehaviour
             case GameState.Menu:
                 break;
             case GameState.MapGeneration:
-                GenerateMap();
+                StartCoroutine(GenerateMap());
                 break;
             case GameState.Play:
                 MapGenerator.OnMapGenerationFinish -= UpdateGameStatePlay;
@@ -58,27 +60,36 @@ public class GameManager : MonoBehaviour
     public void UpdateGameStatePlay() => UpdateGameState(GameState.Play);
     public void UpdateGameStatePause() => UpdateGameState(GameState.Pause);
 
-    private void GenerateMap()
+    private IEnumerator GenerateMap()
     {
-        SceneManager.LoadScene("Game");
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Game");
+
+        // Wait until the asynchronous scene fully loads
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
+        }
+        
+        // After the scene is loaded, invoke the event
         OnMapGenerationStart?.Invoke();
     }
 
-    public int DebugMode { get; set; }
+    public int DebugMode { get; private set; }
+
+    public void SetDebugMode(int value) {
+        DebugMode = value;
+        OnDebugModeChanged?.Invoke();
+    }
 
     // Asset managing
     public Sprite CitySettlementSprite;
     public Sprite TownSettlementSprite;
     public Sprite RuralSettlementSprite;
 
-    public Sprite TransportSprite;
-    public Sprite CellSprite;
-
-    public GameObject CitySettlementPrefab;
-    public GameObject TownSettlementPrefab;
-    public GameObject RuralSettlementPrefab;
+    public GameObject SettlementPrefab;
 
     public GameObject TransportPrefab;
+    public GameObject PassengerPrefab;
 
     public Material ConnectionMaterial;
 }

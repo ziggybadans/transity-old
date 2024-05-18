@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 2114447961894661190}
   - component: {fileID: 5386740603444591396}
   - component: {fileID: 4089331150821525441}
+  - component: {fileID: -2298302063112422509}
   m_Layer: 0
-  m_Name: Town
+  m_Name: Settlement
   m_TagString: Settlement
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -146,7 +147,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 509d495b3176da741b62689b1904cc5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entityPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
-  map: {fileID: 0}
-  spawnInterval: 5
-  passengers: []
+  ParentCell: {fileID: 0}
+--- !u!114 &-2298302063112422509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2900847583392094720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7258a1e1857534161a55c9bab44d1d53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

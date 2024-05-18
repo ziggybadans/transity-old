@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ConnectionHandler : MonoBehaviour
@@ -87,14 +88,19 @@ public class ConnectionHandler : MonoBehaviour
         RaycastHit2D liftPosHit = Raycast();
         if (liftPosHit.collider != null && liftPosHit.collider.CompareTag("Settlement"))
         {
+            Debug.Log("Mouse click is at " + startPos.ToString());
             endPos = liftPosHit.collider.transform.position;
+            Debug.Log("Mouse lift is at " + endPos.ToString());
             endTown = liftPosHit.collider.GetComponent<Settlement>();
+
+            Debug.Log("Connecting settlements " + startTown + " and " + endTown + " with " + currentConnectionObject);
 
             if (startTown != endTown)
             {
                 currentConnectionObjectLr.SetPosition(1, endPos);
 
                 Connection currentConnection = currentConnectionObject.AddComponent<Connection>();
+                currentConnection.AddComponent<TransportSpawning>();
                 currentConnection.SetupConnection(startTown, endTown);
                 currentConnectionObject.tag = "Connection";
 

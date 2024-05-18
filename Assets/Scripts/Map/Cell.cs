@@ -3,6 +3,7 @@ using UnityEngine;
 public class Cell : MonoBehaviour
 {
     public Settlement Settlement { get; set; }
+    [SerializeField]
     private float _citySpawnProbability, _townSpawnProbability, _ruralSpawnProbability;
 
     private void Start() {

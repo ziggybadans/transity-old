@@ -1765,6 +1765,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c99d1327b9cf1e74bbb59d7a509520ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debug: 0
 --- !u!4 &225157424
 Transform:
   m_ObjectHideFlags: 0
@@ -5473,6 +5474,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   state: 0
+  CitySettlementSprite: {fileID: 6146807596959825244, guid: 630e3e47aca37a64bac4e731f93d145a, type: 3}
+  TownSettlementSprite: {fileID: 2107017055449867365, guid: d4e1a1c8244c47c49bea7816e3e38233, type: 3}
+  RuralSettlementSprite: {fileID: -4696721617447184003, guid: a4ab0c5ea59c17447a9259f587acfee1, type: 3}
+  SettlementPrefab: {fileID: 2900847583392094720, guid: 5abee34604d82ce4c8cf7ba2122daefa, type: 3}
+  TransportPrefab: {fileID: 6838855262692231112, guid: 1b0be76dfee1fde4f93965139bf55b6d, type: 3}
+  PassengerPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
+  ConnectionMaterial: {fileID: 2100000, guid: c660081b4df3c914da0ba0fd2510d41d, type: 2}
 --- !u!4 &1054237567
 Transform:
   m_ObjectHideFlags: 0

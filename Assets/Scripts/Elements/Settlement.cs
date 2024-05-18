@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,41 +8,20 @@ public enum SettlementType { City, Town, Rural }
 public class Settlement : MonoBehaviour
 {
     public Cell ParentCell;
-    public GameObject EntityPrefab;
-    public GameObject Map;
-    [Min(0.1f)]
-    private readonly float r_spawnInterval = 3f;
-    private List<Passenger> _passengers = new();
+
+    internal List<Passenger> _passengers = new();
     public SettlementType Type { get; set; }
 
-    private void Start()
-    {
-        StartCoroutine(SpawnEntitiesCoroutine());
+    public event Action OnSpawningStart;
+
+    private void Start() {
+        OnSpawningStart?.Invoke();
     }
 
     private void Update()
     {
         SetPassengerOpacity();
         CalculatePosition();
-    }
-
-    private IEnumerator SpawnEntitiesCoroutine()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(r_spawnInterval);
-            SpawnEntity();
-        }
-    }
-
-    private void SpawnEntity()
-    {
-        GameObject newEntity = Instantiate(EntityPrefab, new Vector3(transform.position.x, transform.position.y, -3f), Quaternion.identity);
-
-        Passenger newPassenger = SetupNewPassenger(newEntity);
-        SetPassengerSprite(newPassenger);
-
-        _passengers.Add(newPassenger);
     }
 
     private void CalculatePosition()
@@ -61,36 +41,6 @@ public class Settlement : MonoBehaviour
     private Vector2 GetPassengerInitialPos() {
         Vector2 vector2 = new Vector2(transform.position.x, transform.position.y) + (Vector2.left * GetComponent<SpriteRenderer>().bounds.size.x);
         return vector2;
-    }
-
-    private Passenger SetupNewPassenger(GameObject newEntity)
-    {
-        Passenger newPassenger = newEntity.GetComponent<Passenger>();
-        newPassenger.Origin = this;
-
-        List<Settlement> settlements = new();
-        foreach (Cell cell in GridManager.Instance.GetCells()) {
-            if (cell.Settlement != null) settlements.Add(cell.Settlement);
-        }
-        Settlement randomSettlement = settlements[UnityEngine.Random.Range(0, settlements.Count)];
-        while (randomSettlement == newPassenger.Origin)
-        {
-            randomSettlement = settlements[UnityEngine.Random.Range(0, settlements.Count)];
-        }
-        newPassenger.Destination = randomSettlement;
-
-        return newPassenger;
-    }
-
-    private void SetPassengerSprite(Passenger passenger)
-    {
-        passenger.GetComponent<SpriteRenderer>().sprite = passenger.Destination.Type switch
-        {
-            SettlementType.City => GameManager.Instance.CitySettlementSprite,
-            SettlementType.Town => GameManager.Instance.TownSettlementSprite,
-            SettlementType.Rural => GameManager.Instance.RuralSettlementSprite,
-            _ => GameManager.Instance.RuralSettlementSprite,
-        };
     }
 
     private void SetPassengerOpacity()
@@ -144,7 +94,7 @@ public class Settlement : MonoBehaviour
         }
     }
 
-    public Passenger AlightPassenger(Transport transport)
+    public Passenger DepartPassenger(Transport transport)
     {
         if (_passengers.Count > 0)
         {

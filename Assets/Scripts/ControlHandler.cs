@@ -4,6 +4,8 @@ using UnityEngine;
 public class ControlHandler : MonoBehaviour
 {
     public static ControlHandler Instance;
+    [SerializeField]
+    private bool debug;
 
     private void Awake()
     {
@@ -18,9 +20,8 @@ public class ControlHandler : MonoBehaviour
         }
     }
 
-    private static event Action UpdateProbabilities;
     public static event Action DrawConnection, MaintainConnection, CreateConnection, DeleteConnection;
-    private bool drawing;
+    private bool drawing = false;
 
     private void Update()
     {
@@ -40,17 +41,16 @@ public class ControlHandler : MonoBehaviour
         }
         if (Input.GetMouseButtonDown(1) && !drawing) DeleteConnection?.Invoke();
 
-        if (Input.GetKeyDown(KeyCode.BackQuote))
+        if (Input.GetKeyDown(KeyCode.M))
         {
             SetDebugMode();
-            UpdateProbabilities?.Invoke();
         }
     }
 
     private void SetDebugMode()
     {
         GameManager GameInstance = GameManager.Instance;
-        if (GameInstance.DebugMode == 3) GameInstance.DebugMode = 0;
-        else GameInstance.DebugMode++;
+        if (GameInstance.DebugMode == 3) GameInstance.SetDebugMode(0);
+        else GameInstance.SetDebugMode(GameInstance.DebugMode + 1);
     }
 }

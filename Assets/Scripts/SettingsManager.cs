@@ -11,6 +11,10 @@ public class SettingsManager : MonoBehaviour
 
     private Dictionary<SettingsTypes, int> _mapGenValues = new();
 
+    [Header("Debug")]
+    [SerializeField]
+    private bool debug;
+
     private void Awake() {
         if (Instance == null) {
             Instance = this;
@@ -28,7 +32,7 @@ public class SettingsManager : MonoBehaviour
 
     public void SetMapGenValue(SettingsTypes settingName, float settingValue) {
         _mapGenValues[settingName] = (int)settingValue;
-        Debug.Log("Updated setting " + settingName.ToString() + " to " + settingValue);
+        if (debug) Debug.Log("Updated setting " + settingName.ToString() + " to " + settingValue);
     }
 
     public int GetMapGenValue(SettingsTypes settingName) {

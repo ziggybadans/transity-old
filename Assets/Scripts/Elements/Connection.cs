@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,57 +6,32 @@ using UnityEngine;
 public class Connection : MonoBehaviour
 {
     private Settlement _startTown, _endTown;
-    private List<GameObject> _entities = new();
-    private GameObject _entityPrefab;
-    private float ENTITY_SPEED = 1f;
-    private int CAPACITY = 6;
-    private int NUM_ENTITIES = 1;
+    private List<Transport> _entities = new();
+    internal float ENTITY_SPEED = 1f;
+    internal int CAPACITY = 6;
+    internal int NUM_ENTITIES = 1;
+
+    public Settlement[] Towns = new Settlement[2];
+    public void AddTransport(Transport transport) { _entities.Add(transport); }
+
+    public event Action OnSpawningStart;
 
     public void SetupConnection(Settlement startTown, Settlement endTown)
     {
-        this._startTown = startTown;
-        this._endTown = endTown;
+        _startTown = startTown;
+        _endTown = endTown;
 
-        StartCoroutine(SpawnEntitiesCoroutine(this._startTown, this._endTown));
-    }
+        Debug.Log("Towns are " + _startTown + " and " + _endTown);
 
-    private IEnumerator SpawnEntitiesCoroutine(Settlement startTown, Settlement endTown)
-    {
-        Vector3 startPos = GetPosFromSettlement(startTown);
-        Vector3 endPos = GetPosFromSettlement(endTown);
+        Towns[0] = _startTown;
+        Towns[1] = _endTown;
 
-        Vector3 direction = (endPos - startPos).normalized;
-        float lineLength = Vector3.Distance(startPos, endPos);
-        float spacing = lineLength / (NUM_ENTITIES + 1);
-
-        for (int i = 1; i <= NUM_ENTITIES; i++)
-        {
-            Vector3 spawnPos = startPos + (i * spacing * direction);
-            spawnPos.z = -2f;
-            GameObject entity = Instantiate(_entityPrefab, spawnPos, Quaternion.identity);
-            _entities.Add(entity);
-
-            SetupEntity(entity.GetComponent<Transport>(), i, startTown, endTown);
-
-            yield return new WaitForSeconds(0.1f);
-        }
-    }
-
-    private Vector3 GetPosFromSettlement(Settlement settlement) {
-        return settlement.ParentCell.transform.position;
-    }
-
-    private void SetupEntity(Transport entity, int i, Settlement startTown, Settlement endTown) {
-        entity.MovingForward = i % 2 != 0;
-        entity._startTown = startTown;
-        entity._endTown = endTown;
-        entity.EntitySpeed = ENTITY_SPEED;
-        entity.Capacity = CAPACITY;
+        OnSpawningStart?.Invoke();
     }
 
     public void DestroyAllEntities() {
-        foreach (GameObject entity in _entities) {
-            Destroy(entity);
+        foreach (Transport entity in _entities) {
+            Destroy(entity.gameObject);
         }
         _entities.Clear();
     }
