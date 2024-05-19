@@ -1,15 +1,16 @@
 using System;
 using Unity.VisualScripting;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
     private int _numTriesCities, _numTriesTowns, _numTriesRural;
-    private GridManager _grid;
-    private int _numCellsX, _numCellsY;
     [Header("Debug")]
     [SerializeField]
     private bool debug;
+    [SerializeField]
+    private bool firstSettlement = true;
 
     public static event Action OnMapGenerationFinish;
 
@@ -36,13 +37,6 @@ public class MapGenerator : MonoBehaviour
         _numTriesRural = SettingsManager.Instance.GetMapGenValue(SettingsTypes.NumRurals);
         if (debug) Debug.Log("Retrieved settings: " + _numTriesCities + ", " + _numTriesTowns + ", " + _numTriesRural);
 
-        _grid = GridManager.Instance;
-
-        _numCellsX = _grid.GRID_WIDTH;
-        _numCellsY = _grid.GRID_HEIGHT;
-        if (debug) Debug.Log("Retrieved grid settings: " + _numCellsX + ", " + _numCellsY);
-
-        UpdateProbabilities();
         GenerateMap();
 
         OnMapGenerationFinish?.Invoke();
@@ -52,7 +46,8 @@ public class MapGenerator : MonoBehaviour
     private void GenerateMap()
     {
         if (debug) Debug.Log("Checking spawn probability for cities...");
-        for (int i = 1; i <= _numTriesCities; i++) CheckSpawnProbability(SettlementType.City);
+        for (int i = 1; i < _numTriesCities; i++) CheckSpawnProbability(SettlementType.City);
+        firstSettlement = true;
         if (debug) Debug.Log("Checking spawn probability for towns...");
         for (int i = 1; i <= _numTriesTowns; i++) CheckSpawnProbability(SettlementType.Town);
         if (debug) Debug.Log("Checking spawn probability for rural localities...");
@@ -61,20 +56,20 @@ public class MapGenerator : MonoBehaviour
 
     private void CheckSpawnProbability(SettlementType settlementType)
     {
-        int x = UnityEngine.Random.Range(0, _numCellsX - 1);
-        int y = UnityEngine.Random.Range(0, _numCellsY - 1);
-        Cell currentCell = _grid.GetCellFromPos(new Vector2Int(x, y));
+        int x = (int)UnityEngine.Random.Range(0, (GridManager.Instance.GRID_WIDTH * GridManager.Instance.GRID_CELL_SIZE) - 1);
+        int y = (int)UnityEngine.Random.Range(0, (GridManager.Instance.GRID_HEIGHT * GridManager.Instance.GRID_CELL_SIZE) - 1);
+        Cell currentCell = GridManager.Instance.GetCellFromPos(new Vector2Int(x, y));
         float spawnProbability = currentCell.GetProbability(settlementType);
 
         float r = UnityEngine.Random.Range(0, 100) / 100f;
-        if (spawnProbability > r && currentCell.Settlement == null)
+        if (spawnProbability > r || firstSettlement)
         {
             if (debug) Debug.Log("Chance succeeded. Spawning " + settlementType.ToString() + "...");
             SpawnSettlement(currentCell, settlementType);
+            if (firstSettlement) firstSettlement = false;
+            UpdateProbabilities();
         }
         else if (debug) Debug.Log("Probability of " + spawnProbability + " was not high enough to spawn a " + settlementType.ToString() + " against random value of " + r + ". Skipping...");
-
-        UpdateProbabilities();
     }
 
     private void SpawnSettlement(Cell currentCell, SettlementType settlementType)
@@ -97,28 +92,25 @@ public class MapGenerator : MonoBehaviour
     public void UpdateProbabilities()
     {
         if (debug) Debug.Log("Updating probabilities...");
-        for (int x = 0; x < _numCellsX; x++)
+        foreach (Cell currentCell in GridManager.Instance.GetCells())
         {
-            for (int y = 0; y < _numCellsY; y++)
+            if (currentCell.Settlement != null) currentCell.SetAllProbabilities(0f);
+            else
             {
-                Cell currentCell = _grid.GetCellFromPos(new Vector2Int(x, y));
-                if (currentCell.Settlement != null) currentCell.SetAllProbabilities(0f);
-                else
+                // We are doing a "reverse raycast" type situation, where the current cell is the one 
+                // getting the probability, while the check cell is where the radial probability
+                // is propagating from, which is why we're checking for a settlement below.
+                foreach (Cell checkCell in GridManager.Instance.GetCells())
                 {
-                    currentCell.SetAllProbabilities(1f);
+                    if (checkCell == currentCell) continue;
 
-                    foreach (Cell cell in _grid.GetCells())
+                    if (checkCell.Settlement != null)
                     {
-                        if (cell == currentCell) continue;
+                        float distance = CalculateDistance(currentCell, checkCell);
 
-                        if (cell.Settlement != null)
-                        {
-                            float distance = CalculateDistance(currentCell, cell);
-
-                            if (cell.Settlement.Type == SettlementType.City) CalculateCityProbability(currentCell, distance);
-                            if (cell.Settlement.Type == SettlementType.Town) CalculateTownProbability(currentCell, distance);
-                            if (cell.Settlement.Type == SettlementType.Rural) CalculateRuralProbability(currentCell, distance);
-                        }
+                        if (checkCell.Settlement.Type == SettlementType.City) CalculateCityProbability(currentCell, distance);
+                        if (checkCell.Settlement.Type == SettlementType.Town) CalculateTownProbability(currentCell, distance);
+                        if (checkCell.Settlement.Type == SettlementType.Rural) CalculateRuralProbability(currentCell, distance);
                     }
                 }
             }
@@ -129,49 +121,100 @@ public class MapGenerator : MonoBehaviour
     {
         float distanceX = Mathf.Abs(currentCell.transform.position.x - checkCell.transform.position.x);
         float distanceY = Mathf.Abs(currentCell.transform.position.y - checkCell.transform.position.y);
-        float distance = Mathf.Sqrt(distanceX * distanceX + distanceY * distanceY) / _grid.GRID_CELL_SIZE;
+        float distance = Mathf.Sqrt(distanceX * distanceX + distanceY * distanceY) / GridManager.Instance.GRID_CELL_SIZE;
 
         return distance;
     }
 
     private void CalculateCityProbability(Cell currentCell, float distance)
     {
-        float cityCalculation = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 1f)) - 1f) / 100f);
-        float cityProbability = currentCell.GetProbability(SettlementType.City) * cityCalculation / (cityCalculation > 0 ? 2 : 0);
-        currentCell.SetProbability(SettlementType.City, Mathf.Round(cityProbability * 100f) / 100f);
-
-        float townCalculation = 25f;
-        if (distance < 4)
+        float cityPreviousProbability;
+        float cityCalculation;
+        float cityProbability;
+        if (distance == 0)
         {
-            townCalculation = Mathf.Pow(distance + 1, 3);
+            cityProbability = 0f;
         }
-        else if (distance > 4 && distance < 15)
+        else
         {
-            townCalculation = -1f * Mathf.Pow((0.5f * distance) - 2, 2) + 75;
+            cityPreviousProbability = currentCell.GetProbability(SettlementType.City);
+            cityCalculation = distance / 25f;
+            cityProbability = Mathf.Min(0.5f, cityCalculation) * cityPreviousProbability;
         }
+        currentCell.SetProbability(SettlementType.City, cityProbability);
 
-        float townProbability = Mathf.Max(0.25f, townCalculation / 100f,
-            currentCell.GetProbability(SettlementType.Town) < 1f ? currentCell.GetProbability(SettlementType.Town) : 0);
-        currentCell.SetProbability(SettlementType.Town, Mathf.Round(townProbability * 100f) / 100f);
+        float townPreviousProbability;
+        float townCalculation;
+        float townProbability;
+        if (distance == 0) {
+            townProbability = 0f;
+        }
+        else
+        {
+            townPreviousProbability = currentCell.GetProbability(SettlementType.Town);
+            if (distance < 10) townCalculation = 3f / distance;
+                else townCalculation = 0f;
+            townProbability = Mathf.Max(Mathf.Min(1f, townCalculation), townPreviousProbability);
+        }
+        currentCell.SetProbability(SettlementType.Town, townProbability);
+
+        float ruralPreviousProbability;
+        float ruralCalculation;
+        float ruralProbability;
+        if (distance == 0) {
+            ruralProbability = 0f;
+        }
+        else {
+            ruralPreviousProbability = currentCell.GetProbability(SettlementType.Rural);
+            ruralCalculation = distance / 25f;
+            ruralProbability = Mathf.Min(Mathf.Min(1f, ruralCalculation), ruralPreviousProbability);
+        }
+        currentCell.SetProbability(SettlementType.Rural, ruralProbability);
     }
 
     private void CalculateTownProbability(Cell currentCell, float distance)
     {
-        if (distance <= 3)
-        {
-            float townCalculation = Mathf.Max(0, (100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f);
-            float townProbability = Mathf.Min(townCalculation / 100f, currentCell.GetProbability(SettlementType.Town));
-            currentCell.SetProbability(SettlementType.Town, Mathf.Round(townProbability * 100f) / 100f);
-
-            float cityCalculation = Mathf.Max(0, ((100f / Mathf.Pow(1f + Mathf.Exp(-0.5f * (distance - 10f)), 0.25f)) - 1f) / 0.75f);
-            float cityProbability = Mathf.Min(cityCalculation / 100f, currentCell.GetProbability(SettlementType.City));
-            currentCell.SetProbability(SettlementType.City, Mathf.Round(cityProbability * 100f) / 100f);
+        float townPreviousProbability;
+        float townCalculation;
+        float townProbability;
+        if (distance == 0) {
+            townProbability = 0f;
         }
+        else
+        {
+            townPreviousProbability = currentCell.GetProbability(SettlementType.Town);
+            townCalculation = distance / 3f;
+            townProbability = Mathf.Min(Mathf.Min(1f, townCalculation), townPreviousProbability);
+        }
+        currentCell.SetProbability(SettlementType.Town, townProbability);
+
+        float ruralPreviousProbability;
+        float ruralCalculation;
+        float ruralProbability;
+        if (distance == 0) {
+            ruralProbability = 0f;
+        }
+        else {
+            ruralPreviousProbability = currentCell.GetProbability(SettlementType.Rural);
+            ruralCalculation = distance / 10f;
+            ruralProbability = Mathf.Min(Mathf.Min(1f, ruralCalculation), ruralPreviousProbability);
+        }
+        currentCell.SetProbability(SettlementType.Rural, ruralProbability);
     }
 
     private void CalculateRuralProbability(Cell currentCell, float distance)
     {
-        float ruralProbability = currentCell.GetProbability(SettlementType.City) * 2 * currentCell.GetProbability(SettlementType.Town);
-        currentCell.SetProbability(SettlementType.Rural, Mathf.Round(ruralProbability * 100f) / 100f);
+        float ruralPreviousProbability;
+        float ruralCalculation;
+        float ruralProbability;
+        if (distance == 0) {
+            ruralProbability = 0f;
+        }
+        else {
+            ruralPreviousProbability = currentCell.GetProbability(SettlementType.Rural);
+            ruralCalculation = distance / 5f;
+            ruralProbability = Mathf.Min(Mathf.Min(1f, ruralCalculation), ruralPreviousProbability);
+        }
+        currentCell.SetProbability(SettlementType.Rural, ruralProbability);
     }
 }

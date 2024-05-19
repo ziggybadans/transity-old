@@ -105,7 +105,7 @@ public class GridManager : MonoBehaviour
     private void UpdateDebugOverlay()
     {
         int debugMode = GameManager.Instance.DebugMode;
-        float clampedProbability;
+        float probability;
         if (debugMode > 0 && debugMode <= 3)
         {
             SettlementType view = debugMode switch
@@ -117,8 +117,8 @@ public class GridManager : MonoBehaviour
             };
 
             foreach (Cell cell in _gridArray) {
-                clampedProbability = CheckCellProbability(cell, view);
-                Color cellColor = Color.Lerp(Color.red, Color.green, clampedProbability);
+                probability = CheckCellProbability(cell, view);
+                Color cellColor = Color.Lerp(Color.red, Color.green, probability);
                 cell.GetComponent<Renderer>().material.color = cellColor;
             }
         } else {

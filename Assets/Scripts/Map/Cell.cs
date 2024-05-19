@@ -4,7 +4,11 @@ public class Cell : MonoBehaviour
 {
     public Settlement Settlement { get; set; }
     [SerializeField]
-    private float _citySpawnProbability, _townSpawnProbability, _ruralSpawnProbability;
+    private float _citySpawnProbability = 0.5f;
+    [SerializeField]
+    private float _townSpawnProbability = 0f;
+    [SerializeField]
+    private float _ruralSpawnProbability = 1f;
 
     private void Start() {
         float cellSize = GridManager.Instance.GRID_CELL_SIZE;
