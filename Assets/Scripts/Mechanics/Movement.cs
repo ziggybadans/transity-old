@@ -6,21 +6,20 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
     private Transport transport;
-    private Settlement lastStation;
     public event Action OnStationArrived;
 
-    private void OnEnable() {
+    private void OnEnable()
+    {
         transport = GetComponent<Transport>();
     }
 
-    private void Update() {
-        if (!transport.boarding) {
+    private void Update()
+    {
+        if (!transport.boarding)
+        {
             CheckSettlement();
-            if (transport.movingForwards) {
-                MoveTransport(transport._startTown.transform.position);
-            } else {
-                MoveTransport(transport._endTown.transform.position);
-            }
+            if (transport.movingForwards) MoveTransport(transport._startTown.transform.position);
+                else MoveTransport(transport._endTown.transform.position);
         }
     }
 
@@ -28,12 +27,9 @@ public class Movement : MonoBehaviour
     {
         Vector3 pos = transform.position;
         RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.zero);
-        if (pos == transport._startTown.transform.position || pos == transport._endTown.transform.position) {
-            if (hit != lastStation) {
-                Debug.Log("Arrived at station.");
-                lastStation = hit.collider.GetComponent<Settlement>();
-                OnStationArrived?.Invoke();
-            }
+        if (pos == transport._startTown.transform.position || pos == transport._endTown.transform.position)
+        {
+            OnStationArrived?.Invoke();
         }
     }
 

@@ -7,11 +7,11 @@ public class Alighting : MonoBehaviour
     private Transport transport;
     private void OnEnable() {
         transport = GetComponent<Transport>();
-        transport.OnBoardingStart += HandleAlightingStart;
+        transport.OnAlightingStart += HandleAlightingStart;
     }
 
     private void OnDisable() {
-        transport.OnBoardingStart -= HandleAlightingStart;
+        transport.OnAlightingStart -= HandleAlightingStart;
     }
 
     private void HandleAlightingStart(object sender, TrainEventData e) {
@@ -25,5 +25,6 @@ public class Alighting : MonoBehaviour
             transport.AlightPassenger(e);
             yield return new WaitForSeconds(0.25f);
         }
+        transport.alighting = false;
     }
 }

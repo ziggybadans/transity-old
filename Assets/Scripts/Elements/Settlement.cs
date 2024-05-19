@@ -35,6 +35,7 @@ public class Settlement : MonoBehaviour
                 _ => _passengers[i - 1].transform.position +
                         (1.3f * _passengers[i - 1].GetComponent<SpriteRenderer>().bounds.size.x * Vector3.left),
             };
+            _passengers[i].gameObject.transform.localScale = new Vector2(0.35f, 0.35f);
         }
     }
 
@@ -98,11 +99,13 @@ public class Settlement : MonoBehaviour
     {
         if (_passengers.Count > 0)
         {
+            Debug.Log("There are passengers at this station.");
             int i = 0;
             while (i < _passengers.Count)
             {
-                if (_passengers[i].Destination == transport._startTown || _passengers[i].Destination == transport._endTown)
+                if (_passengers[i].Destination == transport._startTown.Type || _passengers[i].Destination == transport._endTown.Type)
                 {
+                    Debug.Log("Passenger leaving station!");
                     Passenger passengerAlighting = _passengers[i];
                     _passengers.Remove(passengerAlighting);
                     return passengerAlighting;

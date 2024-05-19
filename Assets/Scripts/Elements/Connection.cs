@@ -7,7 +7,7 @@ public class Connection : MonoBehaviour
 {
     private Settlement _startTown, _endTown;
     private List<Transport> _entities = new();
-    internal float ENTITY_SPEED = 1f;
+    internal float ENTITY_SPEED = 2f;
     internal int CAPACITY = 6;
     internal int NUM_ENTITIES = 1;
 

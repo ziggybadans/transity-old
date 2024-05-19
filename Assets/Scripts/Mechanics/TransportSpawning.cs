@@ -28,8 +28,9 @@ public class TransportSpawning : MonoBehaviour, ISpawner
         {
             Vector3 spawnPos = startPos + (i * spacing * direction);
             spawnPos.z = -2f;
-            GameObject entity = Instantiate(GameManager.Instance.TransportPrefab, spawnPos, Quaternion.identity);
+            GameObject entity = Instantiate(GameManager.Instance.TransportPrefab, spawnPos, Quaternion.identity, connection.transform);
             connection.AddTransport(entity.GetComponent<Transport>());
+            entity.transform.localScale = new Vector2(1.25f, 1.25f);
 
             SetupEntity(entity.GetComponent<Transport>(), i, settlements[0], settlements[1]);
         }
