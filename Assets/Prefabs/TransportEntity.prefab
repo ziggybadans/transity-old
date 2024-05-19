@@ -11,6 +11,9 @@ GameObject:
   - component: {fileID: 5712548899635345161}
   - component: {fileID: 3012998641997052472}
   - component: {fileID: 6025951506564212725}
+  - component: {fileID: 1682484599282226900}
+  - component: {fileID: 6451883442319098014}
+  - component: {fileID: -2274699494149662891}
   m_Layer: 0
   m_Name: TransportEntity
   m_TagString: Untagged
@@ -99,9 +102,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 600a46e46772d6e4f8132d0f35d704c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movingForward: 0
+  movingForwards: 0
   boarding: 0
-  entitySpeed: 1
-  startPos: {x: 0, y: 0, z: 0}
-  endPos: {x: 0, y: 0, z: 0}
-  passengers: []
+  EntitySpeed: 0
+  Capacity: 0
+  _startTown: {fileID: 0}
+  _endTown: {fileID: 0}
+--- !u!114 &1682484599282226900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6838855262692231112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7067af981080848beaec2ebee0cefe79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6451883442319098014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6838855262692231112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7be9c1c30d5e14a889ae2860bd22a156, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-2274699494149662891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6838855262692231112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aad38b04b5aa44bc58df9f8bb0364aff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

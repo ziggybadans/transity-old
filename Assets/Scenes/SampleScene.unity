@@ -410,62 +410,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &781129546
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 781129548}
-  - component: {fileID: 781129547}
-  m_Layer: 0
-  m_Name: Map
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &781129547
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 781129546}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfe1af9fdc1fdb041ad6da4a4ea7feb6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  numTriesCities: 1
-  numTriesTowns: 5
-  numTriesRural: 5
-  cityPrefab: {fileID: 8973645820326527544, guid: 5c841679eb1505744a3f8d8013220fc8, type: 3}
-  townPrefab: {fileID: 4089331150821525441, guid: 5abee34604d82ce4c8cf7ba2122daefa, type: 3}
-  ruralPrefab: {fileID: 6145121332242928149, guid: e91d107291d31184aa1dfb76d01f3d1a, type: 3}
-  entityPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
-  textPrefab: {fileID: 2333067529079232155, guid: bf1427a9fb80bf142ae3f2090286de02, type: 3}
-  gridParent: {fileID: 2147010513}
-  grid: {fileID: 1672888330}
-  settlements: []
-  controlHandler: {fileID: 1789311886}
---- !u!4 &781129548
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 781129546}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.22730282, y: 2.4135065, z: -5.9509897}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1672888327
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,10 +454,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ce34077cbd1fdd42933a5acdbdeb090, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridWidth: 34
-  gridHeight: 19
-  gridCellSize: 2
-  cellSprite: {fileID: 6750033715232265413, guid: 674d1f549fb449940ab5715e977770a9, type: 3}
+  GRID_WIDTH: 34
+  GRID_HEIGHT: 19
+  GRID_CELL_SIZE: 2
 --- !u!1 &1789311885
 GameObject:
   m_ObjectHideFlags: 0
@@ -543,13 +486,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34e7bd701bd3590459e30369d6b604e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lineMaterial: {fileID: 2100000, guid: c660081b4df3c914da0ba0fd2510d41d, type: 2}
-  entityPrefab: {fileID: 6838855262692231112, guid: 1b0be76dfee1fde4f93965139bf55b6d, type: 3}
-  lineWidth: 0.5
-  numEntites: 1
-  debugMode: 0
-  mapGenerator: {fileID: 781129547}
-  entitySpeed: 4
 --- !u!4 &1789311887
 Transform:
   m_ObjectHideFlags: 0
@@ -671,7 +607,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1789311887}
-  - {fileID: 781129548}
   - {fileID: 1672888329}
   - {fileID: 2147010513}
   - {fileID: 519420032}

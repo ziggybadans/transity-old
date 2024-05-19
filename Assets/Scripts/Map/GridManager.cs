@@ -1,57 +1,138 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
-    public int gridWidth = 34;
-    public int gridHeight = 19;
-    public float gridCellSize = 2f;
-    public Sprite cellSprite;
-    private Cell[,] gridArray;
-    private GameObject cell;
+    public static GridManager Instance;
 
-    public Cell[,] GetCells() { return gridArray; }
-    
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
+        MapGenerator.OnMapGenerationFinish += UpdateDebugOverlay;
+        GameManager.Instance.OnDebugModeChanged += UpdateDebugOverlay;
+    }
+
+    public int GRID_WIDTH = 34;
+    public int GRID_HEIGHT = 19;
+    public float GRID_CELL_SIZE = 2f;
+
+    [SerializeReference]
+    private Sprite _cellSprite;
+    private Cell[,] _gridArray;
+    private GameObject _cell;
+    private Camera cam;
+
+    public Cell[,] GetCells() { return _gridArray; }
+
     private void Start()
     {
-        gridArray = new Cell[gridWidth, gridHeight];
+        cam = Camera.main;
 
-        for (int x = 0; x < gridWidth; x++)
+        _gridArray = new Cell[GRID_WIDTH, GRID_HEIGHT];
+
+        for (int x = 0; x < GRID_WIDTH; x++)
         {
-            for (int y = 0; y < gridHeight; y++)
+            for (int y = 0; y < GRID_HEIGHT; y++)
             {
                 Debug.DrawLine(GetBorderFromPosition(x, y), GetBorderFromPosition(x, y + 1), Color.gray, 1000f);
                 Debug.DrawLine(GetBorderFromPosition(x, y), GetBorderFromPosition(x + 1, y), Color.gray, 1000f);
-                
-                cell = new GameObject("Cell");
-                cell.AddComponent<Cell>();
-                cell.AddComponent<SpriteRenderer>().sprite = cellSprite;
-                cell.transform.parent = transform;
-                cell.transform.position = GetPositionForCell(x, y);
-                cell.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
-                cell.GetComponent<Cell>().cellSize = gridCellSize;
-                gridArray[x, y] = cell.GetComponent<Cell>();
+
+                CreateNewCell(x, y);
             }
         }
-        Debug.DrawLine(GetBorderFromPosition(0, gridHeight), GetBorderFromPosition(gridWidth, gridHeight), Color.gray, 1000f);
-        Debug.DrawLine(GetBorderFromPosition(gridWidth, 0), GetBorderFromPosition(gridWidth, gridHeight), Color.gray, 1000f);
+        Debug.DrawLine(GetBorderFromPosition(0, GRID_HEIGHT), GetBorderFromPosition(GRID_WIDTH, GRID_HEIGHT), Color.gray, 1000f);
+        Debug.DrawLine(GetBorderFromPosition(GRID_WIDTH, 0), GetBorderFromPosition(GRID_WIDTH, GRID_HEIGHT), Color.gray, 1000f);
+
+        AdjustCamera();
     }
 
-    private Vector3 GetBorderFromPosition(int x, int y)
+    private void AdjustCamera()
     {
-        return new Vector3(x, y) * gridCellSize;
+        float totalGridWidth = GRID_WIDTH * GRID_CELL_SIZE;
+        float totalGridHeight = GRID_HEIGHT * GRID_CELL_SIZE;
+
+        float aspectRatio = cam.aspect;
+
+        float orthoSizeFromHeight = totalGridHeight / 2f;
+        float orthoSizeFromWidth = totalGridWidth / (2f * aspectRatio);
+
+        cam.orthographicSize = Mathf.Max(orthoSizeFromHeight, orthoSizeFromWidth) + 0.5f;
+        cam.transform.position = new Vector3(totalGridWidth / 2f, totalGridHeight / 2f, -10f);
     }
 
-    private Vector3 GetPositionForCell(int x, int y)
+    private void CreateNewCell(int x, int y)
     {
-        int cellX = (int)(x * gridCellSize + (gridCellSize / 2f));
-        int cellY = (int)(y * gridCellSize + (gridCellSize / 2f));
-
-        return new Vector3(cellX, cellY, -5f);
+        _cell = new GameObject("Cell");
+        _cell.AddComponent<Cell>();
+        _cell.AddComponent<SpriteRenderer>().sprite = _cellSprite;
+        _cell.transform.parent = transform;
+        _cell.transform.position = new Vector3(CalculateCellPos(x), CalculateCellPos(y), -5f);
+        _cell.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+        _gridArray[x, y] = _cell.GetComponent<Cell>();
     }
 
-    public Cell GetCellFromPosition(Vector2Int pos) {
-        return gridArray[pos.x, pos.y];
+    public Vector3 GetBorderFromPosition(int x, int y)
+    {
+        return new Vector3(x, y) * GRID_CELL_SIZE;
+    }
+
+    public int CalculateCellPos(int pos)
+    {
+        int cellPos = (int)(pos * GRID_CELL_SIZE + (GRID_CELL_SIZE / 2f));
+        return cellPos;
+    }
+
+    public int CalculateArrayIndex(int pos)
+    {
+        int cellPos = (int)((pos - (GRID_CELL_SIZE / 2f)) / 2f);
+        return cellPos;
+    }
+
+    public Cell GetCellFromPos(Vector2 pos)
+    {
+        return _gridArray[CalculateArrayIndex((int)pos.x), CalculateArrayIndex((int)pos.y)];
+    }
+
+    private void UpdateDebugOverlay()
+    {
+        int debugMode = GameManager.Instance.DebugMode;
+        float probability;
+        if (debugMode > 0 && debugMode <= 3)
+        {
+            SettlementType view = debugMode switch
+            {
+                1 => SettlementType.City,
+                2 => SettlementType.Town,
+                3 => SettlementType.Rural,
+                _ => throw new InvalidOperationException("Invalid debugMode value")
+            };
+
+            foreach (Cell cell in _gridArray) {
+                probability = CheckCellProbability(cell, view);
+                Color cellColor = Color.Lerp(Color.red, Color.green, probability);
+                cell.GetComponent<Renderer>().material.color = cellColor;
+            }
+        } else {
+            foreach (Cell cell in _gridArray) cell.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 0);
+        }
+    }
+
+    private float CheckCellProbability(Cell cell, SettlementType settlementType)
+    {
+        float value = settlementType switch
+        {
+            SettlementType.City => cell.GetProbability(settlementType) * 2,
+            _ => cell.GetProbability(settlementType),
+        };
+        return value;
     }
 }
