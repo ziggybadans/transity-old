@@ -204,6 +204,19 @@ public class MapGenerator : MonoBehaviour
 
     private void CalculateRuralProbability(Cell currentCell, float distance)
     {
+        float townPreviousProbability;
+        float townCalculation;
+        float townProbability;
+        if (distance == 0) {
+            townProbability = 0f;
+        }
+        else {
+            townPreviousProbability = currentCell.GetProbability(SettlementType.Rural);
+            townCalculation = distance / 5f;
+            townProbability = Mathf.Min(Mathf.Min(1f, townCalculation), townPreviousProbability);
+        }
+        currentCell.SetProbability(SettlementType.Rural, townProbability);
+
         float ruralPreviousProbability;
         float ruralCalculation;
         float ruralProbability;
