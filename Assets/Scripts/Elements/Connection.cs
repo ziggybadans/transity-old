@@ -5,32 +5,51 @@ using UnityEngine;
 
 public class Connection : MonoBehaviour
 {
-    private Settlement _startTown, _endTown;
+    private List<Settlement> settlements = new();
     private List<Transport> _entities = new();
     internal float ENTITY_SPEED = 2f;
     internal int CAPACITY = 6;
     internal int NUM_ENTITIES = 1;
+    internal bool LOOP;
 
     public Settlement[] Towns = new Settlement[2];
     public void AddTransport(Transport transport) { _entities.Add(transport); }
 
     public event Action OnSpawningStart;
 
-    public void SetupConnection(Settlement startTown, Settlement endTown)
+    public void AddStop(Settlement settlement)
     {
-        _startTown = startTown;
-        _endTown = endTown;
+        if (!settlements.Contains(settlement))
+        {
+            settlements.Add(settlement);
+        }
+    }
 
-        Debug.Log("Towns are " + _startTown + " and " + _endTown);
+    public void RemoveStop(Settlement settlement)
+    {
+        if (settlements.Contains(settlement))
+        {
+            settlements.Remove(settlement);
+        }
+    }
 
-        Towns[0] = _startTown;
-        Towns[1] = _endTown;
+    public bool ContainsStop(Settlement settlement) {
+        if (settlements.Contains(settlement)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
+    public void SetupConnection()
+    {
         OnSpawningStart?.Invoke();
     }
 
-    public void DestroyAllEntities() {
-        foreach (Transport entity in _entities) {
+    public void DestroyAllEntities()
+    {
+        foreach (Transport entity in _entities)
+        {
             Destroy(entity.gameObject);
         }
         _entities.Clear();

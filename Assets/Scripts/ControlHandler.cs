@@ -20,14 +20,14 @@ public class ControlHandler : MonoBehaviour
         }
     }
 
-    public static event Action DrawConnection, MaintainConnection, CreateConnection, DeleteConnection;
+    public static event Action CreateConnection, MaintainConnection, FinishConnection, DeleteConnection;
     private bool drawing = false;
 
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            DrawConnection?.Invoke();
+            CreateConnection?.Invoke();
             drawing = true;
         }
         if (Input.GetMouseButton(0) && drawing)
@@ -36,7 +36,7 @@ public class ControlHandler : MonoBehaviour
         }
         if (Input.GetMouseButtonUp(0) && drawing)
         {
-            CreateConnection?.Invoke();
+            FinishConnection?.Invoke();
             drawing = false;
         }
         if (Input.GetMouseButtonDown(1) && !drawing) DeleteConnection?.Invoke();

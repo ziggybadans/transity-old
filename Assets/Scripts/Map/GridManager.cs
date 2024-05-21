@@ -66,7 +66,7 @@ public class GridManager : MonoBehaviour
         float orthoSizeFromWidth = totalGridWidth / (2f * aspectRatio);
 
         cam.orthographicSize = Mathf.Max(orthoSizeFromHeight, orthoSizeFromWidth) + 0.5f;
-        cam.transform.position = new Vector3(totalGridWidth / 2f, totalGridHeight / 2f, -10f);
+        cam.transform.position = new Vector3(totalGridWidth / 2f, totalGridHeight / 2f, -50f);
     }
 
     private void CreateNewCell(int x, int y)

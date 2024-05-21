@@ -18,8 +18,6 @@ public class ConnectionHandler : MonoBehaviour
         }
 
         ControlHandler.CreateConnection += CreateConnection;
-        ControlHandler.DrawConnection += DrawConnection;
-        ControlHandler.MaintainConnection += MaintainConnection;
         ControlHandler.DeleteConnection += DeleteConnection;
     }
 
@@ -27,30 +25,13 @@ public class ConnectionHandler : MonoBehaviour
     private float LINE_WIDTH = 0.5f;
     private GameObject currentConnectionObject;
     private LineRenderer currentConnectionObjectLr;
-    private Vector2 startPos, endPos;
-    private Settlement startTown, endTown;
+    private Settlement lastChangedSettlement;
 
     private Camera cam;
 
     private void Start()
     {
         cam = Camera.main;
-    }
-
-    private void SetupConnectionVisuals(LineRenderer lr, Vector3 startPos, Vector3 endPos)
-    {
-        ConfigureLineRenderer(lr, startPos, endPos);
-        SetMesh(lr);
-    }
-
-    private void ConfigureLineRenderer(LineRenderer lr, Vector3 startPos, Vector3 endPos)
-    {
-        lr.positionCount = 2;
-        lr.SetPosition(0, startPos);
-        lr.SetPosition(1, endPos);
-        lr.startWidth = LINE_WIDTH;
-        lr.endWidth = LINE_WIDTH;
-        lr.material = GameManager.Instance.ConnectionMaterial;
     }
 
     private void SetMesh(LineRenderer lr)
@@ -61,50 +42,86 @@ public class ConnectionHandler : MonoBehaviour
         connectionMesh.sharedMesh = mesh;
     }
 
-    public void DrawConnection()
+    private Vector3 GetCorrectZ(Vector3 pos) {
+        float x = pos.x;
+        float y = pos.y;
+
+        return new Vector3(x, y, -10f);
+    }
+
+    public void CreateConnection()
     {
         RaycastHit2D clickPosHit = Raycast();
         if (clickPosHit.collider != null && clickPosHit.collider.CompareTag("Settlement"))
         {
             currentConnectionObject = new GameObject("Connection");
             currentConnectionObjectLr = currentConnectionObject.AddComponent<LineRenderer>();
+            currentConnectionObject.AddComponent<Connection>();
 
-            startPos = clickPosHit.collider.transform.position;
-            startTown = clickPosHit.collider.GetComponent<Settlement>();
+            currentConnectionObjectLr.positionCount = 2;
+            currentConnectionObjectLr.SetPosition(0, GetCorrectZ(clickPosHit.collider.transform.position));
+            currentConnectionObjectLr.SetPosition(1, GetCorrectZ(clickPosHit.transform.position));
+            currentConnectionObjectLr.startWidth = LINE_WIDTH;
+            currentConnectionObjectLr.endWidth = LINE_WIDTH;
+            currentConnectionObjectLr.material = GameManager.Instance.ConnectionMaterial;
 
-            ConfigureLineRenderer(currentConnectionObjectLr, startPos, startPos);
+            currentConnectionObject.tag = "Connection";
+
+            ControlHandler.MaintainConnection += MaintainConnection;
+            //ControlHandler.FinishConnection += FinishConnection;
         }
     }
 
     public void MaintainConnection()
-    {
+    {/*
+        RaycastHit2D dragPosHit = Raycast();
+        if (dragPosHit.collider != null && dragPosHit.collider.CompareTag("Settlement") && lastChangedSettlement == null)
+        {
+            if (currentConnectionObject.GetComponent<Connection>().ContainsStop(dragPosHit.collider.GetComponent<Settlement>()))
+            {
+                if (currentConnectionObjectLr.GetPosition(currentConnectionObjectLr.positionCount - 1) == dragPosHit.collider.transform.position)
+                {
+                    currentConnectionObject.GetComponent<Connection>().RemoveStop(dragPosHit.collider.GetComponent<Settlement>());
+                    currentConnectionObjectLr.positionCount--;
+                }
+            }
+            else
+            {
+                currentConnectionObject.GetComponent<Connection>().AddStop(dragPosHit.collider.GetComponent<Settlement>());
+                currentConnectionObjectLr.SetPosition(currentConnectionObjectLr.positionCount - 1, dragPosHit.collider.transform.position);
+                currentConnectionObjectLr.positionCount++;
+            }
+            lastChangedSettlement = dragPosHit.collider.GetComponent<Settlement>();
+        }
+        else
+        {
+            */
         Vector3 currentPos = cam.ScreenToWorldPoint(Input.mousePosition);
-        currentPos.z = 0f;
-        currentConnectionObjectLr.SetPosition(1, currentPos);
+        currentConnectionObjectLr.SetPosition(currentConnectionObjectLr.positionCount - 1, GetCorrectZ(currentPos));
+
+        if (lastChangedSettlement != null)
+        {
+            if (Mathf.Abs(currentPos.x) - Mathf.Abs(lastChangedSettlement.transform.position.x) > GridManager.Instance.GRID_CELL_SIZE
+                && Mathf.Abs(currentPos.y) - Mathf.Abs(lastChangedSettlement.transform.position.y) > GridManager.Instance.GRID_CELL_SIZE)
+            {
+                lastChangedSettlement = null;
+            }
+        }
+        //}
     }
 
-    public void CreateConnection()
+    public void FinishConnection()
     {
-        RaycastHit2D liftPosHit = Raycast();
-        if (liftPosHit.collider != null && liftPosHit.collider.CompareTag("Settlement"))
+        ControlHandler.MaintainConnection -= MaintainConnection;
+        ControlHandler.FinishConnection -= FinishConnection;
+
+        if (currentConnectionObjectLr.positionCount >= 2)
         {
-            Debug.Log("Mouse click is at " + startPos.ToString());
-            endPos = liftPosHit.collider.transform.position;
-            Debug.Log("Mouse lift is at " + endPos.ToString());
-            endTown = liftPosHit.collider.GetComponent<Settlement>();
-
-            Debug.Log("Connecting settlements " + startTown + " and " + endTown + " with " + currentConnectionObject);
-
-            if (startTown != endTown)
+            Vector2 mousePos = cam.ScreenToWorldPoint(currentConnectionObjectLr.GetPosition(currentConnectionObjectLr.positionCount - 1));
+            RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
+            if (hit.collider != null && hit.collider.CompareTag("Settlement"))
             {
-                currentConnectionObjectLr.SetPosition(1, endPos);
-
-                Connection currentConnection = currentConnectionObject.AddComponent<Connection>();
-                currentConnection.AddComponent<TransportSpawning>();
-                currentConnection.SetupConnection(startTown, endTown);
-                currentConnectionObject.tag = "Connection";
-
-                SetupConnectionVisuals(currentConnectionObjectLr, startPos, endPos);
+                SetMesh(currentConnectionObjectLr);
             }
             else Destroy(currentConnectionObject);
         }
