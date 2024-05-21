@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Connection : MonoBehaviour
 {
-    private List<Settlement> settlements = new();
+    internal List<Settlement> settlements = new();
     private List<Transport> _entities = new();
     internal float ENTITY_SPEED = 2f;
     internal int CAPACITY = 6;
@@ -19,6 +19,7 @@ public class Connection : MonoBehaviour
 
     public void AddStop(Settlement settlement)
     {
+        Debug.Log("Adding " + settlement);
         if (!settlements.Contains(settlement))
         {
             settlements.Add(settlement);
@@ -27,16 +28,16 @@ public class Connection : MonoBehaviour
 
     public void RemoveStop(Settlement settlement)
     {
-        if (settlements.Contains(settlement))
-        {
-            settlements.Remove(settlement);
-        }
+        Debug.Log("Removing " + settlement);
+        settlements.Remove(settlement);
     }
 
     public bool ContainsStop(Settlement settlement) {
         if (settlements.Contains(settlement)) {
+            Debug.Log("Settlement returns true in list.");
             return true;
         } else {
+            Debug.Log("Settlement returns false in list.");
             return false;
         }
     }

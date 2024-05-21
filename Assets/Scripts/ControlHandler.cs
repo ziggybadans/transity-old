@@ -21,25 +21,22 @@ public class ControlHandler : MonoBehaviour
     }
 
     public static event Action CreateConnection, MaintainConnection, FinishConnection, DeleteConnection;
-    private bool drawing = false;
 
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
             CreateConnection?.Invoke();
-            drawing = true;
         }
-        if (Input.GetMouseButton(0) && drawing)
+        if (Input.GetMouseButton(0))
         {
             MaintainConnection?.Invoke();
         }
-        if (Input.GetMouseButtonUp(0) && drawing)
+        if (Input.GetMouseButtonUp(0))
         {
             FinishConnection?.Invoke();
-            drawing = false;
         }
-        if (Input.GetMouseButtonDown(1) && !drawing) DeleteConnection?.Invoke();
+        if (Input.GetMouseButtonDown(1)) DeleteConnection?.Invoke();
 
         if (Input.GetKeyDown(KeyCode.M))
         {

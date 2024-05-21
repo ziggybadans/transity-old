@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "transity.sln"
+    "dotnet.defaultSolution": "Transity (2024).sln"
 }

@@ -18,7 +18,6 @@ public class ConnectionHandler : MonoBehaviour
         }
 
         ControlHandler.CreateConnection += CreateConnection;
-        ControlHandler.DeleteConnection += DeleteConnection;
     }
 
     [SerializeField]
@@ -42,7 +41,8 @@ public class ConnectionHandler : MonoBehaviour
         connectionMesh.sharedMesh = mesh;
     }
 
-    private Vector3 GetCorrectZ(Vector3 pos) {
+    private Vector3 GetCorrectZ(Vector3 pos)
+    {
         float x = pos.x;
         float y = pos.y;
 
@@ -68,25 +68,34 @@ public class ConnectionHandler : MonoBehaviour
             currentConnectionObject.tag = "Connection";
 
             ControlHandler.MaintainConnection += MaintainConnection;
-            //ControlHandler.FinishConnection += FinishConnection;
+            ControlHandler.FinishConnection += FinishConnection;
+            ControlHandler.DeleteConnection -= DeleteConnection;
         }
     }
 
     public void MaintainConnection()
-    {/*
+    {
         RaycastHit2D dragPosHit = Raycast();
         if (dragPosHit.collider != null && dragPosHit.collider.CompareTag("Settlement") && lastChangedSettlement == null)
         {
+            Debug.Log("Hit settlement!");
             if (currentConnectionObject.GetComponent<Connection>().ContainsStop(dragPosHit.collider.GetComponent<Settlement>()))
             {
-                if (currentConnectionObjectLr.GetPosition(currentConnectionObjectLr.positionCount - 1) == dragPosHit.collider.transform.position)
+                Debug.Log("Settlement already in connection! Removing...");
+                if (currentConnectionObjectLr.GetPosition(currentConnectionObjectLr.positionCount - 2) == dragPosHit.collider.transform.position)
                 {
                     currentConnectionObject.GetComponent<Connection>().RemoveStop(dragPosHit.collider.GetComponent<Settlement>());
                     currentConnectionObjectLr.positionCount--;
                 }
+                else if (dragPosHit.collider.transform.position == currentConnectionObjectLr.GetPosition(0))
+                {
+                    currentConnectionObject.GetComponent<Connection>().LOOP = true;
+                    FinishLoop();
+                }
             }
             else
             {
+                Debug.Log("Settlement not yet in connection! Adding...");
                 currentConnectionObject.GetComponent<Connection>().AddStop(dragPosHit.collider.GetComponent<Settlement>());
                 currentConnectionObjectLr.SetPosition(currentConnectionObjectLr.positionCount - 1, dragPosHit.collider.transform.position);
                 currentConnectionObjectLr.positionCount++;
@@ -95,19 +104,18 @@ public class ConnectionHandler : MonoBehaviour
         }
         else
         {
-            */
-        Vector3 currentPos = cam.ScreenToWorldPoint(Input.mousePosition);
-        currentConnectionObjectLr.SetPosition(currentConnectionObjectLr.positionCount - 1, GetCorrectZ(currentPos));
+            Vector3 currentPos = cam.ScreenToWorldPoint(Input.mousePosition);
+            currentConnectionObjectLr.SetPosition(currentConnectionObjectLr.positionCount - 1, GetCorrectZ(currentPos));
 
-        if (lastChangedSettlement != null)
-        {
-            if (Mathf.Abs(currentPos.x) - Mathf.Abs(lastChangedSettlement.transform.position.x) > GridManager.Instance.GRID_CELL_SIZE
-                && Mathf.Abs(currentPos.y) - Mathf.Abs(lastChangedSettlement.transform.position.y) > GridManager.Instance.GRID_CELL_SIZE)
+            if (lastChangedSettlement != null)
             {
-                lastChangedSettlement = null;
+                if (Mathf.Abs(currentPos.x) - Mathf.Abs(lastChangedSettlement.transform.position.x) > GridManager.Instance.GRID_CELL_SIZE
+                    || Mathf.Abs(currentPos.y) - Mathf.Abs(lastChangedSettlement.transform.position.y) > GridManager.Instance.GRID_CELL_SIZE)
+                {
+                    lastChangedSettlement = null;
+                }
             }
         }
-        //}
     }
 
     public void FinishConnection()
@@ -117,15 +125,24 @@ public class ConnectionHandler : MonoBehaviour
 
         if (currentConnectionObjectLr.positionCount >= 2)
         {
-            Vector2 mousePos = cam.ScreenToWorldPoint(currentConnectionObjectLr.GetPosition(currentConnectionObjectLr.positionCount - 1));
-            RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
-            if (hit.collider != null && hit.collider.CompareTag("Settlement"))
-            {
-                SetMesh(currentConnectionObjectLr);
-            }
-            else Destroy(currentConnectionObject);
+            currentConnectionObjectLr.positionCount--;
+            SetMesh(currentConnectionObjectLr);
+            //currentConnectionObject.AddComponent<TransportSpawning>();
         }
         else Destroy(currentConnectionObject);
+
+        ControlHandler.DeleteConnection += DeleteConnection;
+    }
+
+    public void FinishLoop() {
+        ControlHandler.MaintainConnection -= MaintainConnection;
+        ControlHandler.FinishConnection -= FinishConnection;
+
+        currentConnectionObjectLr.positionCount--;
+        SetMesh(currentConnectionObjectLr);
+        //currentConnectionObject.AddComponent<TransportSpawning>();
+
+        ControlHandler.DeleteConnection += DeleteConnection;
     }
 
     public void DeleteConnection()
