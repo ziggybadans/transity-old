@@ -86,6 +86,8 @@ public class MapGenerator : MonoBehaviour
         settlement.Type = settlementType;
         settlement.GetComponent<SpriteRenderer>().sprite = sprite;
         settlement.ParentCell = currentCell;
+        Node node = settlement.AddComponent<Node>();
+        node.nodeType = NodeType.Settlement;
         currentCell.Settlement = settlement;
     }
 

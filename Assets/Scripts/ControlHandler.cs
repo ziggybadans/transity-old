@@ -1,11 +1,12 @@
 using System;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class ControlHandler : MonoBehaviour
 {
     public static ControlHandler Instance;
     [SerializeField]
-    private bool debug;
+    public bool drawing;
 
     private void Awake()
     {
@@ -20,23 +21,22 @@ public class ControlHandler : MonoBehaviour
         }
     }
 
-    public static event Action CreateConnection, MaintainConnection, FinishConnection, DeleteConnection;
+    public static event Action CreateConnection, FinishConnection, CancelConnection, DeleteConnection;
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (GameManager.Instance.state == GameState.Create)
         {
-            CreateConnection?.Invoke();
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (!drawing) CreateConnection?.Invoke();
+                    else FinishConnection?.Invoke();
+            }
+            if (Input.GetMouseButtonDown(1)) {
+                if (drawing) CancelConnection?.Invoke();
+            }
+            //if (Input.GetMouseButtonDown(1)) DeleteConnection?.Invoke();
         }
-        if (Input.GetMouseButton(0))
-        {
-            MaintainConnection?.Invoke();
-        }
-        if (Input.GetMouseButtonUp(0))
-        {
-            FinishConnection?.Invoke();
-        }
-        if (Input.GetMouseButtonDown(1)) DeleteConnection?.Invoke();
 
         if (Input.GetKeyDown(KeyCode.M))
         {

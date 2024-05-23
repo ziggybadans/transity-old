@@ -74,6 +74,7 @@ public class GridManager : MonoBehaviour
         _cell = new GameObject("Cell");
         _cell.AddComponent<Cell>();
         _cell.AddComponent<SpriteRenderer>().sprite = _cellSprite;
+        _cell.AddComponent<BoxCollider2D>();
         _cell.transform.parent = transform;
         _cell.transform.position = new Vector3(CalculateCellPos(x), CalculateCellPos(y), -5f);
         _cell.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
@@ -89,6 +90,13 @@ public class GridManager : MonoBehaviour
     {
         int cellPos = (int)(pos * GRID_CELL_SIZE + (GRID_CELL_SIZE / 2f));
         return cellPos;
+    }
+
+    public Vector3 CalculateCellVector(Vector2 pos)
+    {
+        int cellPosX = (int)((pos.x - (GRID_CELL_SIZE / 2f)) / 2f);
+        int cellPosY = (int)((pos.y - (GRID_CELL_SIZE / 2f)) / 2f);
+        return new Vector3(cellPosX, cellPosY, -10f);
     }
 
     public int CalculateArrayIndex(int pos)

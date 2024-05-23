@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
     public Settlement Settlement { get; set; }
+
     [SerializeField]
     private float _citySpawnProbability = 0.5f;
     [SerializeField]

@@ -4,22 +4,6 @@ using UnityEngine;
 
 public class UIController : MonoBehaviour
 {
-    [SerializeReference]
-    public static UIController Instance;
-
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-
     [SerializeField]
     private List<UIBlock2D> _views = new();
     [SerializeField]
