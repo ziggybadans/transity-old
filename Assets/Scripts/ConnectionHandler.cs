@@ -149,6 +149,7 @@ public class ConnectionHandler : MonoBehaviour
             SetMesh();
             drawing = false;
             ControlHandler.Instance.drawing = false;
+            currentConnectionObject.AddComponent<TransportSpawning>();
         }
     }
 

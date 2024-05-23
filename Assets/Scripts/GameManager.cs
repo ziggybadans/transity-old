@@ -48,7 +48,9 @@ public class GameManager : MonoBehaviour
             case GameState.Play:
                 MapGenerator.OnMapGenerationFinish -= UpdateGameStatePlay;
                 break;
-            case GameState.Create:
+            case GameState.Connection:
+                break;
+            case GameState.Line:
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
@@ -60,8 +62,8 @@ public class GameManager : MonoBehaviour
     public void UpdateGameStatePlay() => UpdateGameState(GameState.Play);
     public void UpdateGameStateCreate() {
         if (state == GameState.Play) {
-            UpdateGameState(GameState.Create);
-        } else if (state == GameState.Create) {
+            UpdateGameState(GameState.Connection);
+        } else if (state == GameState.Connection) {
             UpdateGameState(GameState.Play);
         }
     }
@@ -98,8 +100,8 @@ public class GameManager : MonoBehaviour
     public GameObject TransportPrefab;
     public GameObject PassengerPrefab;
 
-    public Material ConnectionMaterial;
-    public Material CreatingConnectionMaterial;
+    public Material ConnectionMaterial, CreatingConnectionMaterial;
+    public Material LineMaterial, CreatingLineMaterial;
 
     public Texture2D drawingCursor;
 }
@@ -109,5 +111,6 @@ public enum GameState {
     Menu,
     MapGeneration,
     Play,
-    Create
+    Connection,
+    Line
 }

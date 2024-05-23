@@ -6,7 +6,7 @@ using UnityEngine;
 public class Connection : MonoBehaviour
 {
     internal List<Settlement> settlements = new();
-    private List<Transport> _entities = new();
+    internal List<Transport> _entities = new();
     internal List<Node> nodes = new();
     internal float ENTITY_SPEED = 2f;
     internal int CAPACITY = 6;
