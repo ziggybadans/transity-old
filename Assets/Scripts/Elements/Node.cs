@@ -8,4 +8,4 @@ public class Node : MonoBehaviour
     public List<Line> lines = new();
 }
 
-public enum NodeType { Settlement, Connection }
+public enum NodeType { Settlement, Visible, Hidden }

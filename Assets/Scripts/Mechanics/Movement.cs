@@ -33,7 +33,7 @@ public class Movement : MonoBehaviour
             {
                 if (transport.line.nodes.Contains(node))
                 {
-                    if (node.nodeType == NodeType.Connection)
+                    if (node.nodeType == NodeType.Visible)
                     {
                         transport.currentNode = node;
                         transport.nextNode = transport.SetNextNode();

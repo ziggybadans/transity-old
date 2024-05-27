@@ -12,6 +12,7 @@ public class Line : MonoBehaviour
     internal float TRANSPORT_SPEED = 2f;
     internal int TRANSPORT_CAPACITY = 6;
     internal int NUM_TRANSPORTS = 1;
+    [SerializeField]
     internal bool LOOP = false;
     public List<Transport> activeTransports = new();
 }

@@ -120,8 +120,7 @@ public class ConnectionHandler : MonoBehaviour
         RaycastHit2D raycast = Raycast();
         if (raycast.collider != null)
         {
-            if (raycast.collider.TryGetComponent<Settlement>(out var settlement)
-                || raycast.collider.TryGetComponent<Connection>(out var connection))
+            if (raycast.collider.TryGetComponent<Connection>(out var connection) || raycast.collider.TryGetComponent<Settlement>(out var settlement))
             {
                 endNode = raycast.collider.GetComponent<Node>();
                 endNode.connections.Add(currentConnectionObject.GetComponent<Connection>());
@@ -140,7 +139,7 @@ public class ConnectionHandler : MonoBehaviour
                     GridManager.Instance.GetCellFromPos(currentPos).transform.position.y,
                     -7f
                 );
-                endNode.nodeType = NodeType.Connection;
+                endNode.nodeType = NodeType.Visible;
             }
             currentConnectionObjectLr.SetPosition(1, endNode.transform.position);
             currentConnectionObjectLr.material = GameManager.Instance.ConnectionMaterial;

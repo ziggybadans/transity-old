@@ -27,6 +27,7 @@ public class LineHandler : MonoBehaviour
 
     private Line line;
     private LineRenderer lineLr;
+    [SerializeField]
     private Node firstNode, lastNode;
     private float LINE_WIDTH = 0.5f;
 
@@ -36,6 +37,13 @@ public class LineHandler : MonoBehaviour
     {
         Vector2 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
         RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero, 100f);
+        return hit;
+    }
+
+    private RaycastHit2D Raycast(int mask)
+    {
+        Vector2 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
+        RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero, 100f, mask);
         return hit;
     }
 
@@ -54,6 +62,7 @@ public class LineHandler : MonoBehaviour
                 line.stopVariety.Add(node.GetComponent<Settlement>().Type);
                 node.lines.Add(line);
                 firstNode = node;
+                lastNode = node;
                 ControlHandler.Instance.drawing = true;
             }
         }
@@ -102,33 +111,48 @@ public class LineHandler : MonoBehaviour
         RaycastHit2D raycast = Raycast();
         if (raycast.collider != null && raycast.collider.TryGetComponent<Node>(out var node))
         {
+            Debug.Log("Hit node!");
             if (firstNode != node)
             {
-                if (lastNode != node)
+                Connection connection = null;
+                if (lastNode.connections.Count > 0 && node.connections.Count > 0)
                 {
-                    lineLr.SetPosition(lineLr.positionCount - 1, node.transform.position);
-                    lineLr.positionCount += 1;
-                    line.nodes.Add(node);
-                }
-
-                if (node.nodeType == NodeType.Settlement)
-                {
-                    if (lastNode != node) line.stops.Add(node.GetComponent<Settlement>());
-                    if (!line.stopVariety.Contains(node.GetComponent<Settlement>().Type))
+                    foreach (Connection conn in lastNode.connections)
                     {
-                        line.stopVariety.Add(node.GetComponent<Settlement>().Type);
+                        if (node.connections.Contains(conn)) connection = conn;
+                    }
+                }
+                if (connection != null)
+                {
+                    if (node.nodeType == NodeType.Settlement)
+                    {
+                        if (lastNode != node) line.stops.Add(node.GetComponent<Settlement>());
+                        if (!line.stopVariety.Contains(node.GetComponent<Settlement>().Type))
+                        {
+                            line.stopVariety.Add(node.GetComponent<Settlement>().Type);
+                        }
+
+                        if (lastNode == node)
+                        {
+                            lineLr.material = GameManager.Instance.LineMaterial;
+                            SetMesh();
+                            ControlHandler.Instance.drawing = false;
+                            line.AddComponent<TransportSpawning>();
+                        }
+                        //else lastNode = node;
                     }
 
-                    if (lastNode == node)
+                    if (lastNode != node)
                     {
-                        lineLr.material = GameManager.Instance.LineMaterial;
-                        SetMesh();
-                        ControlHandler.Instance.drawing = false;
-                        line.AddComponent<TransportSpawning>();
+                        lineLr.SetPosition(lineLr.positionCount - 1, node.transform.position);
+                        lineLr.positionCount += 1;
+                        line.nodes.Add(node);
+                        lastNode = node;
                     }
-                    else lastNode = node;
                 }
-            } else {
+            }
+            else
+            {
                 lineLr.SetPosition(lineLr.positionCount - 1, node.transform.position);
                 line.LOOP = true;
                 lineLr.material = GameManager.Instance.LineMaterial;
@@ -141,6 +165,10 @@ public class LineHandler : MonoBehaviour
 
     private void CancelLine()
     {
-        throw new NotImplementedException();
+        ControlHandler.Instance.drawing = false;
+        Destroy(line.gameObject);
+        lineLr = null;
+        firstNode = null;
+        lastNode = null;
     }
 }
