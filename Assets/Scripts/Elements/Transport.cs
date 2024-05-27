@@ -7,13 +7,15 @@ using UnityEngine;
 public class Transport : MonoBehaviour
 {
     [SerializeField]
-    internal bool movingForwards;
+    internal bool reverse;
     [SerializeField]
     internal bool boarding;
     [SerializeField]
     internal bool alighting;
     public float EntitySpeed;
     public int Capacity;
+    public Line line;
+    public Node currentNode, nextNode;
     public Settlement _startTown, _endTown;
     private GameObject _passengerObj;
     private List<Passenger> _passengers = new();
@@ -30,6 +32,9 @@ public class Transport : MonoBehaviour
         _passengerObj.transform.SetLocalPositionAndRotation(new Vector3(-0.25f, 0f, -3f), Quaternion.identity);
         _passengerObj.transform.localPosition = newPosition;
         _passengerObj.transform.localScale *= 0.8f;
+
+        currentNode = line.nodes[0];
+        nextNode = line.nodes[0];
     }
 
     private void OnEnable()
@@ -46,26 +51,127 @@ public class Transport : MonoBehaviour
     {
         boarding = true;
         alighting = true;
-        movingForwards = !movingForwards;
+        currentNode = line.nodes[line.nodes.IndexOf(nextNode)];
         StartCoroutine(StationCycleCoroutine(transform.position));
     }
 
     private IEnumerator StationCycleCoroutine(Vector2 pos)
     {
         Debug.Log("Cueing station loop...");
-        Settlement currentSettlement = GridManager.Instance.GetCellFromPos(pos).Settlement;
+
+        if (GridManager.Instance == null)
+        {
+            Debug.LogError("GridManager.Instance is null!");
+            yield break;
+        }
+
+        Cell cell = GridManager.Instance.GetCellFromPos(pos);
+        if (cell == null)
+        {
+            Debug.LogError("Cell from position is null!");
+            yield break;
+        }
+
+        Settlement currentSettlement = cell.Settlement;
+        if (currentSettlement == null)
+        {
+            Debug.LogError("Initial CurrentSettlement is null!");
+            yield break;
+        }
+
+        if (_passengers == null)
+        {
+            Debug.LogError("_passengers is null!");
+            yield break;
+        }
+
+        Debug.Log("Train event data is " + _passengers.ToString() + Capacity + currentSettlement.ToString());
         var eventData = new TrainEventData(_passengers, Capacity, currentSettlement);
 
-        OnAlightingStart?.Invoke(this, eventData);
-        yield return new WaitUntil(() => alighting == false);
+        //OnAlightingStart?.Invoke(this, eventData);
+        //yield return new WaitUntil(() => alighting == false);
 
-        OnBoardingStart?.Invoke(this, eventData);
-        yield return new WaitUntil(() => boarding == false);
+        // Verify if currentSettlement is still valid
+        if (currentSettlement == null)
+        {
+            Debug.LogError("CurrentSettlement became null after alighting!");
+            yield break;
+        }
+
+        //OnBoardingStart?.Invoke(this, eventData);
+        //yield return new WaitUntil(() => boarding == false);
+
+        // Verify if currentSettlement is still valid
+        if (currentSettlement == null)
+        {
+            Debug.LogError("CurrentSettlement became null after boarding!");
+            yield break;
+        }
+
+        if (line == null)
+        {
+            Debug.LogError("line is null!");
+            yield break;
+        }
+
+        if (line.nodes == null)
+        {
+            Debug.LogError("line.nodes is null or empty!");
+            yield break;
+        }
+
+        if (nextNode == null)
+        {
+            Debug.LogError("nextNode is null!");
+            yield break;
+        }
+
+        SetNextNode();
+    }
+
+    public Node SetNextNode()
+    {
+        if (!line.LOOP)
+        {
+            if (line.nodes.Count - 1 == line.nodes.IndexOf(nextNode)) reverse = true;
+            if (line.nodes.IndexOf(nextNode) == 0) reverse = false;
+
+            if (!reverse)
+            {
+                if (line.nodes.IndexOf(nextNode) + 1 < line.nodes.Count)
+                {
+                    nextNode = line.nodes[line.nodes.IndexOf(nextNode) + 1];
+                }
+                else
+                {
+                    Debug.LogError("Index out of range when trying to increment nextNode!");
+                }
+            }
+            else
+            {
+                if (line.nodes.IndexOf(nextNode) - 1 >= 0)
+                {
+                    nextNode = line.nodes[line.nodes.IndexOf(nextNode) - 1];
+                }
+                else
+                {
+                    Debug.LogError("Index out of range when trying to decrement nextNode!");
+                }
+            }
+        } else {
+            if (line.nodes.IndexOf(nextNode) + 1 == line.nodes.Count) {
+                nextNode = line.nodes[0];
+            } else {
+                nextNode = line.nodes[line.nodes.IndexOf(nextNode) + 1];
+            }
+        }
+        return nextNode;
     }
 
     internal void BoardPassenger(TrainEventData e)
     {
-        Passenger passenger = e.currentSettlement.DepartPassenger(this);
+        Passenger passenger;
+        passenger = e.currentSettlement.DepartPassenger(this);
         if (passenger != null)
         {
             _passengers.Add(passenger);

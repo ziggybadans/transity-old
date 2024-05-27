@@ -60,10 +60,17 @@ public class GameManager : MonoBehaviour
     public void UpdateGameStateMenu() => UpdateGameState(GameState.Menu);
     public void UpdateGameStateMapGen() => UpdateGameState(GameState.MapGeneration);
     public void UpdateGameStatePlay() => UpdateGameState(GameState.Play);
-    public void UpdateGameStateCreate() {
+    public void UpdateGameStateConnection() {
         if (state == GameState.Play) {
             UpdateGameState(GameState.Connection);
         } else if (state == GameState.Connection) {
+            UpdateGameState(GameState.Play);
+        }
+    }
+    public void UpdateGameStateLine() {
+        if (state == GameState.Play) {
+            UpdateGameState(GameState.Line);
+        } else if (state == GameState.Line) {
             UpdateGameState(GameState.Play);
         }
     }

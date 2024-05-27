@@ -103,7 +103,7 @@ public class Settlement : MonoBehaviour
             int i = 0;
             while (i < _passengers.Count)
             {
-                if (_passengers[i].Destination == transport._startTown.Type || _passengers[i].Destination == transport._endTown.Type)
+                if (transport.line.stopVariety.Contains(_passengers[i].Destination))
                 {
                     Debug.Log("Passenger leaving station!");
                     Passenger passengerAlighting = _passengers[i];

@@ -5483,6 +5483,8 @@ MonoBehaviour:
   PassengerPrefab: {fileID: 5196374722878801667, guid: 8e0528cfdd6cfcc4e82571667629b51b, type: 3}
   ConnectionMaterial: {fileID: 2100000, guid: c660081b4df3c914da0ba0fd2510d41d, type: 2}
   CreatingConnectionMaterial: {fileID: 2100000, guid: 57eda8469ac27e2468b5c083295d8b72, type: 2}
+  LineMaterial: {fileID: 2100000, guid: f3c061766286627469fde54479559b50, type: 2}
+  CreatingLineMaterial: {fileID: 2100000, guid: f2fd658a9f6e2634d9d3b18785e5c9d7, type: 2}
   drawingCursor: {fileID: 2800000, guid: 5eba9930c22879d408901d4c792a0bfa, type: 3}
 --- !u!4 &1054237567
 Transform:

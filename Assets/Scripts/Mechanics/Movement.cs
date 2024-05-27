@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
     private Transport transport;
     public event Action OnStationArrived;
+    private Settlement previousStop;
 
     private void OnEnable()
     {
@@ -17,26 +19,61 @@ public class Movement : MonoBehaviour
     {
         if (!transport.boarding)
         {
-            CheckSettlement();
-            if (transport.movingForwards) MoveTransport(transport._startTown.transform.position);
-                else MoveTransport(transport._endTown.transform.position);
+            CheckNode();
+            MoveTransport();
         }
     }
 
-    private void CheckSettlement()
+    private void CheckNode()
     {
-        Vector3 pos = transform.position;
-        RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.zero);
-        if (pos == transport._startTown.transform.position || pos == transport._endTown.transform.position)
+        RaycastHit2D raycast = Raycast();
+        if (raycast.collider != null && raycast.collider.TryGetComponent<Node>(out var node))
         {
-            OnStationArrived?.Invoke();
+            if (transport.transform.position == node.transform.position)
+            {
+                if (transport.line.nodes.Contains(node))
+                {
+                    if (node.nodeType == NodeType.Connection)
+                    {
+                        transport.currentNode = node;
+                        transport.nextNode = transport.SetNextNode();
+                    }
+                    else if (node.nodeType == NodeType.Settlement)
+                    {
+                        RaycastHit2D raycastSettlement = Raycast();
+                        if (raycast.collider != null && raycast.collider.TryGetComponent<Settlement>(out var settlement))
+                        {
+                            if (transport.line.stops.Contains(settlement) && settlement != previousStop)
+                            {
+                                OnStationArrived?.Invoke();
+                                previousStop = settlement;
+                            }
+                        }
+
+                    }
+
+                }
+            }
         }
     }
 
-    private void MoveTransport(Vector3 targetPos)
+    private void MoveTransport()
     {
-        Vector3 direction = targetPos - transform.position;
+        Vector3 start = transport.currentNode.transform.position;
+        Debug.Log("Start position is " + start.x + ", " + start.y);
+        Vector3 end = transport.nextNode.transform.position;
+        Debug.Log("End position is " + end.x + ", " + end.y);
+        Vector3 direction = new(end.x - start.x, end.y - start.y);
+        direction.Normalize();
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-        transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, targetPos, transport.EntitySpeed * Time.deltaTime), Quaternion.Euler(0f, 0f, angle));
+        Debug.Log("Angle is " + angle);
+        transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, transport.nextNode.transform.position, transport.EntitySpeed * Time.deltaTime), Quaternion.Euler(0f, 0f, angle));
+    }
+
+    private RaycastHit2D Raycast()
+    {
+        Vector2 transportPos = transform.position;
+        RaycastHit2D hit = Physics2D.Raycast(transportPos, Vector2.zero, 100f);
+        return hit;
     }
 }

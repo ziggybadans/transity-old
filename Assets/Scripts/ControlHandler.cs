@@ -35,6 +35,7 @@ public class ControlHandler : MonoBehaviour
             }
             else if (GameManager.Instance.state == GameState.Line)
             {
+                Debug.Log("Invoking create line...");
                 if (!drawing) CreateLine?.Invoke();
                 else FinishLine?.Invoke();
             }

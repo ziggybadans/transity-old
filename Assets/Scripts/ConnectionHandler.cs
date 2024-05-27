@@ -24,8 +24,7 @@ public class ConnectionHandler : MonoBehaviour
         ControlHandler.CancelConnection += CancelConncetion;
     }
 
-    [SerializeField]
-    private float LINE_WIDTH = 0.5f;
+    private float LINE_WIDTH = 0.25f;
     private GameObject currentConnectionObject;
     private LineRenderer currentConnectionObjectLr;
     private Node startNode, endNode;
@@ -134,7 +133,7 @@ public class ConnectionHandler : MonoBehaviour
                 endNodeSprite.sprite = GameManager.Instance.NodeSprite;
                 endNodeSprite.color = Color.black;
                 endNode.AddComponent<BoxCollider2D>();
-                endNode.transform.localScale *= 0.5f;
+                endNode.transform.localScale *= 0.25f;
                 Vector3 currentPos = RoundVec3(cam.ScreenToWorldPoint(Input.mousePosition));
                 endNode.gameObject.transform.position = new Vector3(
                     GridManager.Instance.GetCellFromPos(currentPos).transform.position.x,
@@ -149,7 +148,6 @@ public class ConnectionHandler : MonoBehaviour
             SetMesh();
             drawing = false;
             ControlHandler.Instance.drawing = false;
-            currentConnectionObject.AddComponent<TransportSpawning>();
         }
     }
 
