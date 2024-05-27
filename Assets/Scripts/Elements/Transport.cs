@@ -27,11 +27,11 @@ public class Transport : MonoBehaviour
     private void Start()
     {
         _passengerObj = new GameObject("PassengerContainer");
+        _passengerObj.transform.position = new Vector3(transform.position.x, transform.position.y, -8f);
         _passengerObj.transform.parent = transform;
-        Vector3 newPosition = new(-0.25f, 0f, -3f);
-        _passengerObj.transform.SetLocalPositionAndRotation(new Vector3(-0.25f, 0f, -3f), Quaternion.identity);
-        _passengerObj.transform.localPosition = newPosition;
+        _passengerObj.transform.SetLocalPositionAndRotation(new Vector3(-0.25f, 0f, 0f), Quaternion.identity);
         _passengerObj.transform.localScale *= 0.8f;
+        _passengerObj.transform.localPosition = new Vector3(-0.25f, 0f, -1f);
 
         currentNode = line.nodes[0];
         nextNode = line.nodes[0];
@@ -88,8 +88,8 @@ public class Transport : MonoBehaviour
         Debug.Log("Train event data is " + _passengers.ToString() + Capacity + currentSettlement.ToString());
         var eventData = new TrainEventData(_passengers, Capacity, currentSettlement);
 
-        //OnAlightingStart?.Invoke(this, eventData);
-        //yield return new WaitUntil(() => alighting == false);
+        OnAlightingStart?.Invoke(this, eventData);
+        yield return new WaitUntil(() => alighting == false);
 
         // Verify if currentSettlement is still valid
         if (currentSettlement == null)
@@ -98,8 +98,8 @@ public class Transport : MonoBehaviour
             yield break;
         }
 
-        //OnBoardingStart?.Invoke(this, eventData);
-        //yield return new WaitUntil(() => boarding == false);
+        OnBoardingStart?.Invoke(this, eventData);
+        yield return new WaitUntil(() => boarding == false);
 
         // Verify if currentSettlement is still valid
         if (currentSettlement == null)

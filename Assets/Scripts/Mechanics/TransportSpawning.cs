@@ -19,7 +19,7 @@ public class TransportSpawning : MonoBehaviour
             Transport transport = Instantiate(GameManager.Instance.TransportPrefab, 
                                     spawnPos, Quaternion.identity, line.transform).GetComponent<Transport>();
             line.activeTransports.Add(transport);
-            transport.transform.localScale = new Vector2(1.25f, 1.25f);
+            transport.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
 
             SetupTransport(transport, line);
         }
